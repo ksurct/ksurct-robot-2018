@@ -1,3 +1,2 @@
-pkg-resources==0.0.0
 PySDL2==0.9.5
 websockets==3.4
