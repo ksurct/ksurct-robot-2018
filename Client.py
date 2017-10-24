@@ -17,7 +17,7 @@ async def SendMessage():
     '''
         Send the state of the controller to the server
     '''
-    websocket = await websockets.connect('ws://10.243.193.47:8055/')  # zerotier IP of server
+    websocket = await websockets.connect('ws://127.0.0.1:8055/')  # zerotier IP of server
     try:
         while True:
             controller.update()
