@@ -12,7 +12,7 @@ from Server import Server
 
 
 port = 8055
-ip = '127.0.0.1'
+ip = '129.130.46.36'
 
 def main():
     '''
@@ -31,8 +31,9 @@ def main():
     except:
         # rightMotor.set_all_pwm(0, 0)
         # leftMotor.set_all_pwm(0, 0)
-        print('broken')
         asyncio.get_event_loop().close()
+        logging.info("Closing")
+        quit()
 
 
 if __name__ == '__main__':

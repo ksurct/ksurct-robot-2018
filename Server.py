@@ -42,7 +42,6 @@ class Server(object):
         '''
         logging.info('Server starting up')
         self.server = await websockets.serve(self.handle_new_connection, self.ip, self.port, timeout=1)
-        return self.server
 
     async def handle_new_connection(self, ws, path):
         '''
@@ -69,16 +68,22 @@ class Server(object):
         self._active_connections.remove(ws)
 
     async def handle_msg(self, msg):
+        logging.info(pickle.loads(msg))
+
+    async def send(self, msg):
+        logging.info("Sending a messgage")
         try:
-            await self.send("Hello")
-        except Esception as e:
-            print(e)
+            for ws in self._active_connections:
+                asyncio.ensure_future(ws.send(msg))
+        except:
+            self._active_connections = set()
+            asyncio.get_event_loop().close()
         
 def main():
     ip = '127.0.0.1'
     port = 8055
     
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
     server = Server(ip, port)
     asyncio.get_event_loop().run_until_complete(server.start_server())
