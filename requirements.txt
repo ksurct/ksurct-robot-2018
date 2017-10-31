@@ -1,0 +1,2 @@
+PySDL2==0.9.5
+websockets==3.4
