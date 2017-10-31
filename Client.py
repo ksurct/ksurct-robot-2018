@@ -8,16 +8,22 @@ from xbox import Controller
 import pickle
 import sys
 
+import logging
+logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+
 Controller.init()
 controller = Controller(0)
-oldRobot = {}
+oldRobot = {'john': 34, 'bob':99}
 
 
 async def SendMessage():
     '''
         Send the state of the controller to the server
     '''
-    websocket = await websockets.connect('ws://127.0.0.1:8055/')  # zerotier IP of server
+    #ws://127.0.0.1:8055/ # zerotier IP of server
+    logging.debug('pre IP connect')
+    websocket = await websockets.connect('ws://129.130.46.36:8055')
+    logging.info('Sent message')
     try:
         while True:
             controller.update()
@@ -41,7 +47,7 @@ async def SendMessage():
             robot['lbx'] = 1 if controller.left_bumper() and controller.x() else 0
             robot['lbb'] = 1 if controller.left_bumper() and controller.b() else 0
             robot['lby'] = 1 if controller.left_bumper() and controller.y() else 0
-            robot['lba'] = 1 if controller.left_bumper() and controller.a() else 0
+            robot['lba'] = 1 if controller.left_buof obmper() and controller.a() else 0
             robot['rby'] = 1 if controller.right_bumper() and controller.y() else 0
             robot['rba'] = 1 if controller.right_bumper() and controller.a() else 0
             # If leftStick.X < 0 then we want to trim off the left motor to turn left.
@@ -53,9 +59,13 @@ async def SendMessage():
                 await websocket.send(pickle.dumps(robot))
                 oldRobot = robot
             with suppress(asyncio.TimeoutError):
-                response = await asyncio.wait_for(websocket.recv(), 1)
+                response = await asyncio.wait_for(websocket.recv(), .1) #the number here is how fast it refreshes
 
     finally:
         await websocket.close()
 
-asyncio.get_event_loop().run_until_complete(SendMessage())
+def main():
+    asyncio.get_event_loop().run_until_complete(SendMessage())
+
+if __name__ == '__main__':
+    main()
