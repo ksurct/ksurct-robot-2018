@@ -4,14 +4,11 @@ Server
 This is the server to be ran on the pi
 '''
 import asyncio
-import websockets
 import pickle
-
-# Logging
 import logging
+import websockets
 
 p = 1
-
 
 class TextColors:
     '''
@@ -24,7 +21,7 @@ class TextColors:
 
 
 class Server(object):
-    ''' 
+    '''
         Defines a server object to handle connections
     '''
 
@@ -53,7 +50,7 @@ class Server(object):
         self._active_connections.add(ws)
         
         # Test the new connection
-        # _thread.start_new_thread(self.test_connection, ())
+        # _thread.start_new(self.test_connection, ())
 
         # Run forever until connection is lost
         while True:

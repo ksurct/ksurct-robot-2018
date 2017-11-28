@@ -47,7 +47,7 @@ async def SendMessage():
             robot['lbx'] = 1 if controller.left_bumper() and controller.x() else 0
             robot['lbb'] = 1 if controller.left_bumper() and controller.b() else 0
             robot['lby'] = 1 if controller.left_bumper() and controller.y() else 0
-            robot['lba'] = 1 if controller.left_buof obmper() and controller.a() else 0
+            robot['lba'] = 1 if controller.left_bumper() and controller.a() else 0
             robot['rby'] = 1 if controller.right_bumper() and controller.y() else 0
             robot['rba'] = 1 if controller.right_bumper() and controller.a() else 0
             # If leftStick.X < 0 then we want to trim off the left motor to turn left.
