@@ -25,19 +25,21 @@ class Server(object):
         Defines a server object to handle connections
     '''
 
-    def __init__(self, ip, port):
+    def __init__(self, ip, port, bot=None):
         '''
             Construct a server with an ip on a port
         '''
         self._active_connections = set()
         self.ip = ip
         self.port = port
+        if bot:
+            self.bot = bot
 
     async def start_server(self):
         '''
             Start the server
         '''
-        logging.info('Server starting up')
+        logging.info('Server starting up at {0}:{1}'.format(self.ip, self.port))
         self.server = await websockets.serve(self.handle_new_connection, self.ip, self.port, timeout=1)
 
     async def handle_new_connection(self, ws, path):
@@ -46,7 +48,7 @@ class Server(object):
         '''
         global p
 
-        logging.info('New connection to server')
+        logging.info('New connection to server: {0}'.format(str(ws)))
         self._active_connections.add(ws)
         
         # Test the new connection
@@ -73,6 +75,7 @@ class Server(object):
             for ws in self._active_connections:
                 asyncio.ensure_future(ws.send(msg))
         except:
+            logging.info("Message send failure")
             self._active_connections = set()
             asyncio.get_event_loop().close()
         

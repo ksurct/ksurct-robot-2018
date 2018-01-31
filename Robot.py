@@ -1,40 +1,87 @@
-'''
-Robot.py
+''' Robot.py
 
-This is the main controller file
-
+    Describe what components the robot is made of
 '''
 
-import asyncio
-import websockets
-import logging
-from Server import Server
+from Components import *
+from Settings import *
 
 
-port = 8055
-ip = '129.130.46.36'
+class Robot(object):
 
-def main():
-    '''
-        Main Entrance to the program
-    '''
-    # Setup Logging
-    # Debug Mode
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    # Production Mode
-    # logging.basicConfig(filename='log.log', format='%(asctime)s %(message)s', level=logging.INFO)
+    def __init__(self):
 
-    try:
-        server = Server(ip, port)
-        asyncio.get_event_loop().run_until_complete(server.start_server())
-        asyncio.get_event_loop().run_forever()
-    except:
-        # rightMotor.set_all_pwm(0, 0)
-        # leftMotor.set_all_pwm(0, 0)
-        asyncio.get_event_loop().close()
-        logging.info("Closing")
-        quit()
+        # Setup drive motors
+        self.drive_motor_0 = DCMotorComponent(
+            DRIVE_MOTOR_0_P1,
+            DRIVE_MOTOR_0_P2,
+            DRIVE_MOTOR_0_HIGH,
+            DRIVE_MOTOR_0_LOW,
+            reverse=DRIVE_MOTOR_0_REVERSE
+        )
 
+        self.drive_motor_1 = DCMotorComponent(
+            DRIVE_MOTOR_1_P1,
+            DRIVE_MOTOR_1_P2,
+            DRIVE_MOTOR_1_HIGH,
+            DRIVE_MOTOR_1_LOW,
+            reverse=DRIVE_MOTOR_1_REVERSE
+        )
 
-if __name__ == '__main__':
-    main()
+        # Setup drive motors
+        self.front_led_0 = LEDComponent(
+            LED_0_BUTTON,
+            LED_0_PIN
+        )
+
+        self.front_led_1 = LEDComponent(
+            LED_1_BUTTON,
+            LED_1_PIN
+        )
+
+        # Setup sensors
+        self.sensor_0 = SensorComponent(
+            SENSOR_0_PIN,
+            SENSOR_0_CHANNEL
+        )
+
+        self.sensor_1 = SensorComponent(
+            SENSOR_1_PIN,
+            SENSOR_1_CHANNEL
+        )
+
+        self.sensor_2 = SensorComponent(
+            SENSOR_2_PIN,
+            SENSOR_2_CHANNEL
+        )
+
+        self.sensor_3 = SensorComponent(
+            SENSOR_3_PIN,
+            SENSOR_3_CHANNEL
+        )
+
+        # Setup steering motors
+        self.steer_motor_0 = DCMotorComponent(
+            STEER_MOTOR_0_P1,
+            STEER_MOTOR_0_P2,
+            STEER_MOTOR_0_HIGH,
+            STEER_MOTOR_0_LOW,
+            reverse=STEER_MOTOR_0_REVERSE
+        )
+
+        self.steer_motor_1 = DCMotorComponent(
+            STEER_MOTOR_1_P1,
+            STEER_MOTOR_1_P2,
+            STEER_MOTOR_1_HIGH,
+            STEER_MOTOR_1_LOW,
+            reverse=STEER_MOTOR_1_REVERSE
+        )
+    
+    def get_msg(self):
+        pass
+    
+    def stop(self):
+        pass
+    
+    def update(self):
+        pass
