@@ -57,9 +57,10 @@ class LEDComponent(Component):
 class SensorComponent(Component):
 
     def __init__(self, pin, channel):
-        pass
+        self.pin = pin
+        self.channel = channel
     
-    def get_status(self):
+    async def produce(self):
         pass
 
 

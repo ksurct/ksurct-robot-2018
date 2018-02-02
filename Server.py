@@ -25,15 +25,14 @@ class Server(object):
         Defines a server object to handle connections
     '''
 
-    def __init__(self, ip, port, bot=None):
+    def __init__(self, ip, port, robot):
         '''
             Construct a server with an ip on a port
         '''
         self._active_connections = set()
         self.ip = ip
         self.port = port
-        if bot:
-            self.bot = bot
+        self.robot = robot
 
     async def start_server(self):
         '''
@@ -46,32 +45,73 @@ class Server(object):
         '''
             Handle a new incoming connection to the server
         '''
-        global p
 
+        # Note the new connection
         logging.info('New connection to server: {0}'.format(str(ws)))
+        # Add the connection to the set
         self._active_connections.add(ws)
-        
-        # Test the new connection
-        # _thread.start_new(self.test_connection, ())
+        # Set status to alive
+        alive = True
 
+        # Create tasks to run in the event loop
+        consumer_task = asyncio.ensure_future(ws.recv())
+        producer_task = asyncio.ensure_future(self.robot.produce())
+        
         # Run forever until connection is lost
-        while True:
-            if p == 2: # check if connection has been lost
-                # Stop the robot
-                # Need actual code to stop the robot
-                quit()
-            else:
-                # Wait for a message
-                result = await ws.recv()
-            await self.handle_msg(result)
+        while alive:
+            # Wait for the first task to be completed
+            done, pending = await asyncio.wait(
+                [consumer_task, producer_task],
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            # If consumer task is completed,
+            if consumer_task in done:
+                # Get message from the task
+                message = consumer_task.result()
+                logging.debug(message)
+                if message is not None:
+                    # Load from the pickle and handle the message
+                    self.handle_msg(pickle.loads(message))
+                    # Create a new task to be run in the event loop
+                    listener_task = asyncio.ensure_future(ws.recv())
+                else:
+                    # Kill the connection
+                    alive = False
+            # If producer task is completed,
+            if producer_task in done:
+                # Get the message from the task
+                message = producer_task.result()
+                # Check that the connection is still available
+                if ws.open:
+                    # Send the mesage to the client
+                    await ws.send(pickle.dumps(message))
+                    producer_task = asyncio.ensure_future(self.robot.produce())
+                else:
+                    alive = False
+        # Connection lost, stop the robot
+        self.robot.stop()
         self._active_connections.remove(ws)
 
-    async def handle_msg(self, msg):
-        logging.info(pickle.loads(msg))
+'''
+    async def consumer_handler(self, ws, path):
+        while True:
+            message = await websocket.recv()
+            await self.handle_msg(message)
+    
+    async def producer_handler(self, ws, path):
+        while True:
+            message = await self.robot.produce()
+            await ws.send(pickle.dumps(message))
+'''
+
+    def handle_msg(self, msg):
+        logging.info(msg)
+        self.robot.update(msg)
 
     async def send(self, msg):
-        logging.info("Sending a messgage")
         try:
+            logging.info("Sending a messgage")
+
             for ws in self._active_connections:
                 asyncio.ensure_future(ws.send(msg))
         except:

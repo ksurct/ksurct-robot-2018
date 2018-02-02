@@ -27,7 +27,7 @@ def main():
     robot = Robot()
 
     try:
-        server = Server(SERVER_IP, SERVER_PORT, bot=robot)
+        server = Server(SERVER_IP, SERVER_PORT, robot)
         asyncio.get_event_loop().run_until_complete(server.start_server())
         asyncio.get_event_loop().run_forever()
     except:

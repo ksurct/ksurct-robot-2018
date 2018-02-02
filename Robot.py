@@ -77,8 +77,29 @@ class Robot(object):
             reverse=STEER_MOTOR_1_REVERSE
         )
     
-    def get_msg(self):
-        pass
+    async def produce(self):
+
+        sensor_0_task = asyncio.ensure_future(self.sensor_0.produce())
+        sensor_1_task = asyncio.ensure_future(self.sensor_1.produce())
+        sensor_2_task = asyncio.ensure_future(self.sensor_2.produce())
+        sensor_3_task = asyncio.ensure_future(self.sensor_3.produce())
+
+        # Wait for all sensors to return data with async
+        done, pending = await asyncio.wait(
+            [sensor_0_task, sensor_1_task, sensor_2_task, sensor_3_task],
+            return_when=asyncio.ALL_COMPLETED,
+        )
+
+        # Package all results into a dictionary
+        result = {}
+        
+        result[self.sensor_0.channel] = sensor_0_task.result()
+        result[self.sensor_1.channel] = sensor_1_task.result()
+        result[self.sensor_2.channel] = sensor_2_task.result()
+        result[self.sensor_3.channel] = sensor_3_task.result()
+        
+        # return the dictionary
+        return result
     
     def stop(self):
         pass

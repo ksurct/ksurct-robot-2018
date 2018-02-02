@@ -25,8 +25,8 @@ async def SendMessage():
     '''
     
     logging.debug('pre IP connect')
-    websocket = await websockets.connect('ws://{0}:{1}'.format(ip, port))
-    logging.info('Sent message')
+    websocket = await websockets.connect('ws://{0}:{1}'.format(IP, PORT))
+    logging.info('Connected to server at: {0}'.format(websocket.ra))
     try:
         while True:
             controller.update()
