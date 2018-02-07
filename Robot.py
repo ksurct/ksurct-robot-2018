@@ -20,7 +20,7 @@ class Robot(object):
             reverse=DRIVE_MOTOR_0_REVERSE
         )
 
-        self.drive_motor_1 = DCMotorComponent(
+        self.drive_motor_1 = DCMotorComponent
             DRIVE_MOTOR_1_P1,
             DRIVE_MOTOR_1_P2,
             DRIVE_MOTOR_1_HIGH,
@@ -78,7 +78,7 @@ class Robot(object):
         )
     
     async def produce(self):
-
+        raise NotImplementedError()
         sensor_0_task = asyncio.ensure_future(self.sensor_0.produce())
         sensor_1_task = asyncio.ensure_future(self.sensor_1.produce())
         sensor_2_task = asyncio.ensure_future(self.sensor_2.produce())
@@ -102,7 +102,7 @@ class Robot(object):
         return result
     
     def stop(self):
-        pass
+        raise NotImplementedError()
     
     def update(self):
-        pass
+        raise NotImplementedError()
