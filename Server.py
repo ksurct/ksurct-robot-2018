@@ -59,7 +59,7 @@ class Server(object):
 
         # Create tasks to run in the event loop
         consumer_task = asyncio.ensure_future(self.consumer_handler(ws))
-        producer_task = asyncio.ensure_future(self.robot.produce())
+        producer_task = asyncio.ensure_future(self.producer_handler(ws))
         
         # Run forever until connection is lost
         while alive:
@@ -69,7 +69,7 @@ class Server(object):
                 return_when=asyncio.FIRST_COMPLETED,
             )
 
-            # If consumer task is completed,
+            # If consumer task is completed
             if consumer_task in done:
                 # Get message from the task
                 message = consumer_task.result()
@@ -83,7 +83,7 @@ class Server(object):
                     # Kill the connection
                     alive = False
             
-            # If producer task is completed,
+            # If producer task is completed
             if producer_task in done:
                 # Get the message from the task
                 message = producer_task.result()
@@ -104,17 +104,18 @@ class Server(object):
             passes that message to the robot, if it exsits
         '''
 
-        # Receive the message
-        pickled_message = await websocket.recv()
+        while True:
+            # Receive the message
+            pickled_message = await websocket.recv()
 
-        # Use pickle to load the message
-        message = pickle.loads(pickled_message)
+            # Use pickle to load the message
+            message = pickle.loads(pickled_message)
 
-        self.logger.debug('Recieved: {}'.format(message))
-        
-        # Update the robot if it exsits
-        if self.robot:
-            await self.robot.update(pickle.loads(message)
+            self.logger.debug('Recieved: {}'.format(message))
+            
+            # Update the robot if it exsits
+            if self.robot:
+                await self.robot.update(pickle.loads(message))
     
     async def producer_handler(self, ws):
         '''
@@ -122,8 +123,18 @@ class Server(object):
             and then sends that message to the client
         '''
         
-        message = await self.robot.produce()
-        await ws.send(pickle.dumps(message))
+        while True:
+            # Get the message from the robot, if it exsits
+            if self.robot:
+                message = await self.robot.produce()
+
+            self.logger.debug("Sending: {}".format(message))
+
+            # Use pickle to package the message
+            pickled_message = pickle.dumps(message)
+
+            # Send the message
+            await ws.send(pickled_message)
 
     async def send(self, msg):
         try:
