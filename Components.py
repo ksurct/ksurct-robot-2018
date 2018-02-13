@@ -1,6 +1,6 @@
 ''' Components.py
 
-    Define components and how they should work for the bot
+    Define components and how they should work for the robot
 '''
 
 from RPi.GPIO as io
@@ -83,7 +83,7 @@ class MotorComponent(Component):
         io.output(p2, False)
 
     def update(self, data):
-        pass
+        raise NotImplementedError()
 
 
 class DCMotorComponent(MotorComponent):
@@ -113,6 +113,6 @@ class PWMMotorComponent(MotorComponent):
         io.setup(pwm_pin, io.OUT)
     
     def update(self, data):
-        pass
+        raise NotImplementedError()
     
     

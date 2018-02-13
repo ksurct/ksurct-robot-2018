@@ -1,5 +1,5 @@
 '''
-Server
+Server.py
 
 This is the server to be ran on the pi
 '''
@@ -8,7 +8,6 @@ import pickle
 import logging
 import websockets
 
-p = 1
 
 class TextColors:
     '''
@@ -40,7 +39,7 @@ class Server(object):
         '''
             Start the server on the defined ip and port
         '''
-        logging.info('Server starting up at {0}:{1}'.format(self.ip, self.port))
+        self.logger.info('Server starting up at {0}:{1}'.format(self.ip, self.port))
         self.server = await websockets.serve(self.handle_new_connection, self.ip, self.port, timeout=1)
 
     async def handle_new_connection(self, ws, path):
@@ -49,56 +48,63 @@ class Server(object):
         '''
 
         # Note the new connection
-        self.logger.info('New connection to server at: {0}'.format(ws.remote_address))
-        
+        self.logger.info('New connection to server: {0}'.format(str(ws)))
         # Add the connection to the set
         self._active_connections.add(ws)
-        
         # Set status to alive
         alive = True
 
         # Create tasks to run in the event loop
-        consumer_task = asyncio.ensure_future(self.consumer_handler(ws))
-        producer_task = asyncio.ensure_future(self.producer_handler(ws))
+        consumer_task = asyncio.ensure_future(ws.recv())
+        producer_task = asyncio.ensure_future(self.robot.produce())
         
         # Run forever until connection is lost
-        while alive:
-            # Wait for the first task to be completed
-            done, pending = await asyncio.wait(
-                [consumer_task, producer_task],
-                return_when=asyncio.FIRST_COMPLETED,
-            )
+        try:
+            while alive:
+                # Wait for the first task to be completed
+                done, pending = await asyncio.wait(
+                    [consumer_task, producer_task],
+                    return_when=asyncio.FIRST_COMPLETED,
+                )
+                # If consumer task is completed,
+                if consumer_task in done:
+                    # Get message from the task
+                    message = consumer_task.result()
+                    self.logger.debug(message)
+                    if message is not None:
+                        # Load from the pickle and handle the message
+                        self.handle_msg(pickle.loads(message))
+                        # Create a new task to be run in the event loop
+                        listener_task = asyncio.ensure_future(ws.recv())
+                    else:
+                        # Kill the connection
+                        alive = False
+                # If producer task is completed,
+                if producer_task in done:
+                    # Get the message from the task
+                    message = producer_task.result()
+                    # Check that the connection is still available
+                    if ws.open:
+                        # Send the mesage to the client
+                        await ws.send(pickle.dumps(message))
+                        producer_task = asyncio.ensure_future(self.robot.produce())
+                    else:
+                        alive = False
+        finally:
+            # Stop robot
+            self.stop()
+            self.logger.info('Robot stopped')
 
-            # If consumer task is completed
-            if consumer_task in done:
-                # Get message from the task
-                message = consumer_task.result()
-                logging.debug(message)
-                if message is not None:
-                    # Load from the pickle and handle the message
-                    self.handle_msg(pickle.loads(message))
-                    # Create a new task to be run in the event loop
-                    listener_task = asyncio.ensure_future(ws.recv())
-                else:
-                    # Kill the connection
-                    alive = False
+            # Close Connection
+            if ws.open:
+                await ws.close()
+            self.logger.info('Connection closed: {}'.format(ws.remote_address))
             
-            # If producer task is completed
-            if producer_task in done:
-                # Get the message from the task
-                message = producer_task.result()
-                # Check that the connection is still available
-                if ws.open:
-                    # Send the mesage to the client
-                    await ws.send(pickle.dumps(message))
-                    producer_task = asyncio.ensure_future(self.robot.produce())
-                else:
-                    alive = False
-        # Connection lost, stop the robot
-        self.robot.stop()
-        self._active_connections.remove(ws)
+            # Remove connection
+            self._active_connections.remove(ws)
+            self.logger.info('Connection removed: {}'.format(ws.remote_address))
 
-    async def consumer_handler(self, ws):
+    async def consumer_handler(self, ws): # Unused right now
         '''
             Awaits for a message from the client and
             passes that message to the robot, if it exsits
@@ -117,7 +123,7 @@ class Server(object):
             if self.robot:
                 await self.robot.update(pickle.loads(message))
     
-    async def producer_handler(self, ws):
+    async def producer_handler(self, ws): # Unused right now
         '''
             Awaits for the robot to produce a message
             and then sends that message to the client
@@ -136,7 +142,7 @@ class Server(object):
             # Send the message
             await ws.send(pickled_message)
 
-    async def send(self, msg):
+    async def send(self, msg): # Unused right now
         try:
             self.logger.debug("Sending: {}".format(msg))
             for ws in self._active_connections:
@@ -174,6 +180,7 @@ def test_server():
     
     # Setup logging
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
 
     # Create server object
     server = Server(ip, port, None)

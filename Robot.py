@@ -8,6 +8,9 @@ from Settings import *
 
 
 class Robot(object):
+    '''
+        Define the components that the robot is made up of
+    '''
 
     def __init__(self):
 
@@ -78,7 +81,9 @@ class Robot(object):
         )
     
     async def produce(self):
-        raise NotImplementedError()
+        '''
+            Wait for the sensors to read back a distance
+        '''
         sensor_0_task = asyncio.ensure_future(self.sensor_0.produce())
         sensor_1_task = asyncio.ensure_future(self.sensor_1.produce())
         sensor_2_task = asyncio.ensure_future(self.sensor_2.produce())
@@ -102,7 +107,13 @@ class Robot(object):
         return result
     
     def stop(self):
+        '''
+            Stop the Robot
+        '''
         raise NotImplementedError()
     
-    def update(self):
+    async def update(self, data):
+        '''
+            Update all the robots components with the data dictionary
+        '''
         raise NotImplementedError()

@@ -6,16 +6,21 @@
 import websockets
 import asyncio
 from contextlib import suppress
+from concurrent.futures import CancelledError
 from xbox import Controller
 import pickle
-import sys
 
 import logging
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
-IP = '10.132.13.137'
+logging.basicConfig(format='%(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+IP = '10.132.66.254'
 PORT = 8055
 
+DELAY_TIME = 1
+
+# Initalize controller number 0
 Controller.init()
 controller = Controller(0)
 
@@ -24,14 +29,25 @@ async def SendMessage():
         Send the state of the controller to the server
     '''
     
-    logging.debug('pre IP connect')
-    websocket = await websockets.connect('ws://{0}:{1}'.format(IP, PORT))
-    logging.info('Connected to server at: {0}'.format(websocket.ra))
+    # Try to reconect to the server on failure
+    while True:
+        try:
+            websocket = await websockets.connect('ws://{0}:{1}'.format(IP, PORT))
+        except ConnectionRefusedError:
+            logger.warn('Connection Refused at {0}:{1}, trying again'.format(IP, PORT))
+            await asyncio.sleep(DELAY_TIME)
+        else:
+            break
+    
+    logger.info('Connected to server at: {0}'.format(str(websocket.remote_address)))
+
+    # Create the dictionary to send
+    robot = {}
+
     try:
         while True:
+            # update the controller object
             controller.update()
-            
-            robot = {}
 
             # General buttons
             robot['x'] = 1 if controller.x() else 0
@@ -75,17 +91,36 @@ async def SendMessage():
             # robot['rbb'] = 1 if controller.right_bumper() and controller.b() else 0
             # robot['rba'] = 1 if controller.right_bumper() and controller.a() else 0
 
+            # Send the robot state
             if(robot):
-                print(robot)
+                logger.debug('Sending: {}'.format(robot))
                 await websocket.send(pickle.dumps(robot))
             with suppress(asyncio.TimeoutError):
                 response = await asyncio.wait_for(websocket.recv(), .1) #the number here is how fast it refreshes
-
+    
+    except CancelledError:
+        pass
+    except websockets.ConnectionClosed:
+        logger.info('Server closed connection')
     finally:
+        # Close the connection
         await websocket.close()
+        logger.info('Connection closed to: {}'.format(websocket.remote_address))
 
 def main():
-    asyncio.get_event_loop().run_until_complete(SendMessage())
+    loop = asyncio.get_event_loop()
+    try:
+        current_task = asyncio.ensure_future(SendMessage())
+        loop.run_until_complete(current_task)
+    except KeyboardInterrupt:
+        logger.info('Keyboard Interrupt. Closing Connection...')
+        
+        # Cancel tasks
+        current_task.cancel() # Set task to be cancelled
+        loop.run_forever() # This line actually cancels the task
+
+    finally:
+        loop.close()
 
 if __name__ == '__main__':
     main()
