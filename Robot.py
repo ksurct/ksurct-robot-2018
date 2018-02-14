@@ -23,7 +23,7 @@ class Robot(object):
             reverse=DRIVE_MOTOR_0_REVERSE
         )
 
-        self.drive_motor_1 = DCMotorComponent
+        self.drive_motor_1 = DCMotorComponent(
             DRIVE_MOTOR_1_P1,
             DRIVE_MOTOR_1_P2,
             DRIVE_MOTOR_1_HIGH,
