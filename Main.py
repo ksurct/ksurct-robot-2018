@@ -1,5 +1,4 @@
-'''
-Main.py
+'''Main.py
 
 This is the main controller file
 
@@ -14,14 +13,10 @@ from Settings import *
 
 
 def main():
-    '''
-        Main Entrance to the program
-    '''
+    ''' Main Entrance to the program '''
+
     # Setup Logging
-    # Debug Mode
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    # Production Mode
-    # logging.basicConfig(filename='log.log', format='%(asctime)s %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
 
     # Get our logger
     logger = logging.getLogger(__name__)
@@ -33,7 +28,7 @@ def main():
     robot = Robot()
 
     server = Server(SERVER_IP, SERVER_PORT, robot)
-    
+
     try:
         # Main event loop
         loop.run_until_complete(server.start_server())
@@ -41,7 +36,7 @@ def main():
 
     except KeyboardInterrupt:
         logger.info('Keyboard Interrupt. Closing Connections...')
-    
+
     finally:
         # Stop the Robot
         robot.stop()

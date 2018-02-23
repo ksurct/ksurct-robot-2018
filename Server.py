@@ -1,5 +1,4 @@
-'''
-Server.py
+'''Server.py
 
 This is the server to be ran on the pi
 '''
@@ -176,4 +175,5 @@ def test_server():
         loop.close()
         logger.info('Event loop closed')
 
-if __name__ == '_
+if __name__ == '__main__':
+    test_server()
