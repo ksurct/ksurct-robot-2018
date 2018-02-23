@@ -33,7 +33,7 @@ class Server(object):
 
     async def start_server(self):
         ''' Start the server on the defined ip and port '''
-        
+
         self.logger.info('Server starting up at {0}:{1}'.format(self.ip, self.port))
         self.server = await websockets.serve(self.handle_new_connection, self.ip, self.port, timeout=1)
 
@@ -41,14 +41,16 @@ class Server(object):
         ''' Handle a new incoming connection to the server '''
 
         # Note the new connection
-        self.logger.info('New connection to server: {0}'.format(str(ws)))
+        self.logger.info('New connection to server from: {0}'.format(str(ws.remote_address)))
         # Add the connection to the set
         self._active_connections.add(ws)
 
         # Create tasks to run in the event loop
-        consumer_task = asyncio.ensure_future(self.consumer_handler())
-        producer_task = asyncio.ensure_future(self.producer_handler())
-        
+        try:
+            consumer_task = asyncio.ensure_future(self.consumer_handler(ws))
+            producer_task = asyncio.ensure_future(self.producer_handler(ws))
+
+            await asyncio.wait([consumer_task, producer_task])
         # # Run forever until connection is lost
         # try:
         #     while alive:
@@ -87,36 +89,36 @@ class Server(object):
         #                 alive = False
         finally:
             # Stop robot
+            self.logger.info('Stopping Robot')
             self.stop()
-            self.logger.info('Robot stopped')
 
             # Close Connection
             if ws.open:
                 await ws.close()
             self.logger.info('Connection closed: {}'.format(ws.remote_address))
-            
+
             # Remove connection
             self._active_connections.remove(ws)
             self.logger.info('Connection removed: {}'.format(ws.remote_address))
 
-    async def consumer_handler(self, ws): # Unused right now
+    async def consumer_handler(self, ws):
         ''' Waits for a message from the client and
             passes that message to the robot, if it exsits
         '''
         while True:
             # Receive the message
-            pickled_message = await websocket.recv()
+            pickled_message = await ws.recv()
 
             # Use pickle to load the message
             message = pickle.loads(pickled_message)
 
             self.logger.info('Recieved: {}'.format(message))
-            
+
             # Update the robot if it exsits
             if self.robot:
-                await self.robot.update(pickle.loads(message))
-    
-    async def producer_handler(self, ws): # Unused right now
+                await self.robot.update(message)
+
+    async def producer_handler(self, ws):
         ''' Waits for the robot to produce a message
             and then sends that message to the client
         '''
@@ -133,39 +135,38 @@ class Server(object):
 
                 # Send the message
                 await ws.send(pickled_message)
-    
+
     async def shutdown(self):
         ''' Shutdown the server if it exsits '''
         if self.server:
             self.server.close()
             await self.server.wait_closed()
-    
+
     def stop(self):
         ''' Stop the robot if it exsits '''
         if self.robot:
-            self.logger.info("Stopping the Robot")
             self.robot.stop()
-        
+
 def test_server():
     ''' Sets up a test server with robot set to none on localhost for testing '''
-    
+
     ip = '127.0.0.1' # localhost
     port = 8055
-    
+
     # Setup logging
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
     logger = logging.getLogger(__name__)
 
     # Create server object
     server = Server(ip, port, None)
-    
+
     try:
         loop.run_until_complete(server.start_server())
         loop.run_forever()
 
     except KeyboardInterrupt:
-        logger.info('Keyboard Interrupt. Closing Connections...')
-    
+        logger.warn('Keyboard Interrupt. Closing Connections...')
+
     finally:
         # Shutdown the server
         task = asyncio.ensure_future(server.shutdown())
