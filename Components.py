@@ -104,9 +104,9 @@ class PCA9685Mixin(object):
 
         self.i2c_channel = i2c_channel
     
-    def set_pwm(value):
+    def set_pwm(self, value):
         ''' Use i2c to set the pwm on self.i2c_channel '''
-        raise NotImplementedError()
+        self.i2c_board.set_pwm(self.i2c_channel, 0, value)
 
 
 class MotorComponent(PCA9685Mixin, OutputComponent):
@@ -130,36 +130,69 @@ class MotorComponent(PCA9685Mixin, OutputComponent):
         self.stop()
 
     def stop(self):
-        ''' Close all conections '''
-        raise NotImplementedError()
+        ''' Stop motor '''
+        self.set_pwm(0)
 
     def update(self, data_dict):
         ''' Update the state of the motor based on the data_dict '''
-        raise NotImplementedError()
+        self.set_pwm(data_dict[self.button_axis])
     
 
 class ServoComponent(OutputComponent):
 
     PWM_FREQ = SERVO_PWM_FREQ
 
-    def __init__(self, i2c_address, i2c_channel, button_axis, reverse):
-        ''' Setup PCA9685 and button '''
+    def __init__(self, i2c_address, i2c_channel, on_button, off_button, max_pwm, min_pwm, button_speed):
+        ''' Setup PCA9685 and button logic '''
 
         # Setup PCA9685
         super().__init__(i2c_address, i2c_channel)
 
         # Setup button
-        self.button_axis = button_axis
-        self.reverse = reverse
+        self.on_button = on_button
+        self.off_button = off_button
+        
+        self.max_pwm = max_pwm
+        self.min_pwm = min_pwm
+
+        # self.current = min_pwm
+        self.target = min_pwm
+        # self.servo_speed = servo_speed
+        self.button_speed = button_speed
     
     def stop(self):
-        ''' Close all conections '''
-        raise NotImplementedError()
+        ''' Stop Servo '''
+        pass
+        # self.target = self.current
     
-    def update(self, data_dict):
-        ''' Update the state of the servo based on the data_dict '''
-        raise NotImplementedError()
+    # async def async_loop(self):
+    #     ''' Loop to be ran in async loop '''
+    #     while True:
+    #         if self.current < self.target:
+    #             if self.current + self.servo_speed < self.target:
+    #                 self.current += self.servo_speed
+    #                 self.set_pwm(self.current)
+    #             else:
+    #                 self.current = self.target
+            
+    #         asyncio.sleep(0)
 
 
+    async def update(self, data_dict):
+        ''' Update the target of the servo based on the data_dict '''
+
+        if data_dict[self.on_button]:
+            if self.target + self.button_speed < self.max_pwm:
+                self.target += self.button_speed
+            else:
+                self.target = self.max_pwm
+        
+        if data_dict[self.off_button]:
+            if self.target - self.button_speed > self.min_pwm:
+                self.target -+ self.button_speed
+            else:
+                self.target = self.min_pwm
+        
+        self.set_pwm(self.target)
 
 

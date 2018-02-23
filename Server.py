@@ -80,8 +80,9 @@ class Server(object):
                     message = producer_task.result()
                     # Check that the connection is still available
                     if ws.open:
-                        # Send the mesage to the client
-                        await ws.send(pickle.dumps(message))
+                        if message:
+                            # Send the mesage to the client
+                            await ws.send(pickle.dumps(message))
                         producer_task = asyncio.ensure_future(self.robot.produce())
                     else:
                         # Kill the connection

@@ -16,9 +16,13 @@ class Robot(object):
 
         output_components = [
             LEDComponent(LED_0_BUTTON, LED_0_PIN),
-            LEDComponent(LED_1_BUTTON, LED_1_PIN),
+            ServoComponent(0x40, 0, 'up', 'down', 4096, 0, 10),
             # Motors and servos too
         ]
+
+        # check output components
+        for output in output_components:
+            assert isinstance(output, OutputComponent)
 
         input_components = [
             SensorComponent(SENSOR_0_PIN, SENSOR_0_CHANNEL),
@@ -30,11 +34,15 @@ class Robot(object):
             SensorComponent(SENSOR_6_PIN, SENSOR_6_CHANNEL),
             SensorComponent(SENSOR_7_PIN, SENSOR_7_CHANNEL),
         ]
+
+        # check input components
+        for input_ in input_components:
+            assert isinstance(intput_, InputComponent)
     
     async def produce(self):
         ''' Wait for the sensors to read back a distance '''
-
-        await asyncio.sleep(.01)
+        while True:
+            await asyncio.sleep(1000)
         return {"hello": 1}
 
         tasks = [asyncio.ensure_future(input_.produce()) for input_ in self.input_components]
@@ -52,16 +60,20 @@ class Robot(object):
         return result
     
     def stop(self):
-        ''' Stop the Robot '''
+        ''' Stop the Robot's components '''
+        
         for output in output_components:
-            assert isinstance(output, Component)
             output.stop()
         
         for input_ in input_components:
-            assert isinstance(intput_, Component)
             input_.stop()
     
-    async def update(self, data):
+    async def update(self, data_dict):
         ''' Update all the robots components with the data dictionary '''
+        tasks = []
+
+        for output in output_components:
+            tasks.append(asyncio.ensure_future(output.update(data_dict))
         
-        await asyncio.sleep(0.01)
+        await asyncio.gather(*tasks)
+        

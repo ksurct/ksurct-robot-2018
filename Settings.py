@@ -22,12 +22,8 @@ DRIVE_MOTOR_1_LOW = None
 DRIVE_MOTOR_1_REVERSE = None
 
 # LED 0 settings
-LED_0_BUTTON = None
-LED_0_PIN = None
-
-# LED 1 settings
-LED_1_BUTTON = None
-LED_1_PIN = None
+LED_0_BUTTON = 'a'
+LED_0_PIN = 20
 
 # Sensor 0 settings
 SENSOR_0_PIN = None
