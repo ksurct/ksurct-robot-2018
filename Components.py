@@ -179,16 +179,10 @@ class ServoComponent(PCA9685Mixin, OutputComponent):
         ''' Update the target of the servo based on the data_dict '''
 
         if data_dict[self.on_button]:
-            if self.target + self.button_speed < self.max_pwm:
-                self.target += self.button_speed
-            else:
-                self.target = self.max_pwm
+            self.target = min(self.target + self.button_speed, self.max_pwm)
 
         if data_dict[self.off_button]:
-            if self.target - self.button_speed > self.min_pwm:
-                self.target -= self.button_speed
-            else:
-                self.target = self.min_pwm
+            self.target = max(self.target - self.button_speed, self.min_pwm)
 
         self.set_pwm(self.target)
 

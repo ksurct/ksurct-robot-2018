@@ -51,42 +51,7 @@ class Server(object):
             producer_task = asyncio.ensure_future(self.producer_handler(ws))
 
             await asyncio.wait([consumer_task, producer_task])
-        # # Run forever until connection is lost
-        # try:
-        #     while alive:
-        #         # Wait for the first task to be completed
-        #         done, pending = await asyncio.wait(
-        #             [consumer_task, producer_task],
-        #             return_when=asyncio.FIRST_COMPLETED,
-        #         )
-        #         # If consumer task is completed,
-        #         if consumer_task in done:
-        #             # Get message from the task
-        #             message = consumer_task.result()
-        #             self.logger.debug(message)
-        #             if message is not None:
-        #                 # Load from the pickle and handle the message
-        #                 self.robot.update(pickle.loads(message))
-        #                 # Create a new task to be run in the event loop
-        #                 consumer_task = asyncio.ensure_future(ws.recv())
-        #             else:
-        #                 # Kill the connection
-        #                 self.logger.debug('Message was empty, killing conection.')
-        #                 alive = False
-        #         # If producer task is completed,
-        #         if producer_task in done:
-        #             # Get the message from the task
-        #             message = producer_task.result()
-        #             # Check that the connection is still available
-        #             if ws.open:
-        #                 if message:
-        #                     # Send the mesage to the client
-        #                     await ws.send(pickle.dumps(message))
-        #                 producer_task = asyncio.ensure_future(self.robot.produce())
-        #             else:
-        #                 # Kill the connection
-        #                 self.logger.debug('Connection no longer open, killing conection.')
-        #                 alive = False
+
         finally:
             # Stop robot
             self.logger.info('Stopping Robot')
@@ -105,7 +70,7 @@ class Server(object):
         ''' Waits for a message from the client and
             passes that message to the robot, if it exsits
         '''
-        while True:
+        while ws.open:
             # Receive the message
             pickled_message = await ws.recv()
 
@@ -123,7 +88,7 @@ class Server(object):
             and then sends that message to the client
         '''
 
-        while True:
+        while ws.open:
             # Get the message from the robot, if it exsits
             if self.robot:
                 message = await self.robot.produce()
@@ -139,6 +104,9 @@ class Server(object):
     async def shutdown(self):
         ''' Shutdown the server if it exsits '''
         if self.server:
+            for c in self._active_connections:
+                c.close()
+                self._active_connections.remove(c)
             self.server.close()
             await self.server.wait_closed()
 
