@@ -50,7 +50,7 @@ class Server(object):
             consumer_task = asyncio.ensure_future(self.consumer_handler(ws))
             producer_task = asyncio.ensure_future(self.producer_handler(ws))
 
-            await asyncio.wait([consumer_task, producer_task])
+            await asyncio.wait([consumer_task, producer_task], return_when=asyncio.FIRST_EXCEPTION)
 
         finally:
             # Stop robot
@@ -104,9 +104,6 @@ class Server(object):
     async def shutdown(self):
         ''' Shutdown the server if it exsits '''
         if self.server:
-            for c in self._active_connections:
-                c.close()
-                self._active_connections.remove(c)
             self.server.close()
             await self.server.wait_closed()
 
