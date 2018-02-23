@@ -20,14 +20,11 @@ class TextColors:
 
 
 class Server(object):
-    '''
-        Defines a server object to handle connections
-    '''
+    ''' Defines a server object to handle connections '''
 
     def __init__(self, ip, port, robot):
-        '''
-            Construct a server with an ip on a port
-        '''
+        ''' Construct a server with an ip on a port '''
+
         self._active_connections = set()
         self.ip = ip
         self.port = port
@@ -36,16 +33,13 @@ class Server(object):
         self.robot = robot
 
     async def start_server(self):
-        '''
-            Start the server on the defined ip and port
-        '''
+        ''' Start the server on the defined ip and port '''
+        
         self.logger.info('Server starting up at {0}:{1}'.format(self.ip, self.port))
         self.server = await websockets.serve(self.handle_new_connection, self.ip, self.port, timeout=1)
 
     async def handle_new_connection(self, ws, path):
-        '''
-            Handle a new incoming connection to the server
-        '''
+        ''' Handle a new incoming connection to the server '''
 
         # Note the new connection
         self.logger.info('New connection to server: {0}'.format(str(ws)))
@@ -73,11 +67,12 @@ class Server(object):
                     self.logger.debug(message)
                     if message is not None:
                         # Load from the pickle and handle the message
-                        self.handle_msg(pickle.loads(message))
+                        self.robot.update(pickle.loads(message))
                         # Create a new task to be run in the event loop
-                        listener_task = asyncio.ensure_future(ws.recv())
+                        consumer_task = asyncio.ensure_future(ws.recv())
                     else:
                         # Kill the connection
+                        self.logger.debug('Message was empty, killing conection.')
                         alive = False
                 # If producer task is completed,
                 if producer_task in done:
@@ -89,6 +84,8 @@ class Server(object):
                         await ws.send(pickle.dumps(message))
                         producer_task = asyncio.ensure_future(self.robot.produce())
                     else:
+                        # Kill the connection
+                        self.logger.debug('Connection no longer open, killing conection.')
                         alive = False
         finally:
             # Stop robot
@@ -105,34 +102,32 @@ class Server(object):
             self.logger.info('Connection removed: {}'.format(ws.remote_address))
 
     async def consumer_handler(self, ws): # Unused right now
-        '''
-            Awaits for a message from the client and
+        ''' Waits for a message from the client and
             passes that message to the robot, if it exsits
         '''
 
-        while True:
-            # Receive the message
-            pickled_message = await websocket.recv()
+        # Receive the message
+        pickled_message = await websocket.recv()
 
-            # Use pickle to load the message
-            message = pickle.loads(pickled_message)
+        # Use pickle to load the message
+        message = pickle.loads(pickled_message)
 
-            self.logger.debug('Recieved: {}'.format(message))
-            
-            # Update the robot if it exsits
-            if self.robot:
-                await self.robot.update(pickle.loads(message))
+        self.logger.debug('Recieved: {}'.format(message))
+        
+        # Update the robot if it exsits
+        if self.robot:
+            await self.robot.update(pickle.loads(message))
+        
+        return True
     
     async def producer_handler(self, ws): # Unused right now
-        '''
-            Awaits for the robot to produce a message
+        ''' Waits for the robot to produce a message
             and then sends that message to the client
         '''
-        
-        while True:
-            # Get the message from the robot, if it exsits
-            if self.robot:
-                message = await self.robot.produce()
+
+        # Get the message from the robot, if it exsits
+        if self.robot:
+            message = await self.robot.produce()
 
             self.logger.debug("Sending: {}".format(message))
 
@@ -142,38 +137,22 @@ class Server(object):
             # Send the message
             await ws.send(pickled_message)
 
-    async def send(self, msg): # Unused right now
-        try:
-            self.logger.debug("Sending: {}".format(msg))
-            for ws in self._active_connections:
-                asyncio.ensure_future(ws.send(msg))
-        except:
-            self.logger.info('Send failed')
-            # self._active_connections = set()
-            # asyncio.get_event_loop().close()
+        return True
     
     async def shutdown(self):
-        '''
-            Shutdown the server if it exsits
-        '''
-
+        ''' Shutdown the server if it exsits '''
         if self.server:
             self.server.close()
             await self.server.wait_closed()
     
     def stop(self):
-        '''
-            Stop the robot if it exsits
-        '''
-
+        ''' Stop the robot if it exsits '''
         if self.robot:
             self.logger.info("Stopping the Robot")
             self.robot.stop()
         
 def test_server():
-    '''
-        Sets up a test server with robot set to none on localhost for testing
-    '''
+    ''' Sets up a test server with robot set to none on localhost for testing '''
     
     ip = '127.0.0.1' # localhost
     port = 8055
