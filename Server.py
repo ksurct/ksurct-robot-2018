@@ -1,6 +1,6 @@
-'''Server.py
+''' Server.py
 
-This is the server to be ran on the pi
+    This is the server to be ran on the pi
 '''
 import asyncio
 import pickle

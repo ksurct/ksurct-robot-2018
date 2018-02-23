@@ -74,14 +74,8 @@ class Robot(object):
         ''' Update all the robots components with the data dictionary '''
         tasks = []
 
-<<<<<<< HEAD
         for output in output_components:
             tasks.append(asyncio.ensure_future(output.update(data_dict)))
         
-=======
-        for output in self.output_components:
-            tasks.append(asyncio.ensure_future(output.update(data_dict)))
-
->>>>>>> testing
         await asyncio.gather(*tasks)
 
