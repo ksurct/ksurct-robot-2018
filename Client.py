@@ -15,7 +15,7 @@ import logging
 logging.basicConfig(format='%(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-IP = '10.132.66.254'
+IP = '129.130.46.4'
 PORT = 8055
 
 DELAY_TIME = 1

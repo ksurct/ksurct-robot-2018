@@ -6,8 +6,8 @@
 import RPi.GPIO as io
 
 # Server Setings
-SERVER_IP = None
-SERVER_PORT = None
+SERVER_IP = '129.130.46.4'
+SERVER_PORT = 8055
 
 # Motor settings
 MOTOR_PWM_FREQ = 1600
