@@ -8,6 +8,8 @@ import asyncio
 import RPi.GPIO as io
 from Adafruit_PCA9685 import PCA9685
 
+from Settings import MOTOR_PWM_FREQ, SERVO_PWM_FREQ
+
 
 class Component(object):
 
@@ -75,7 +77,7 @@ class LEDComponent(OutputComponent):
                 io.output(self.pin, True)
                 self._state = 3
         elif self._state == 1:
-            if !data_dict[self.button]:
+            if not data_dict[self.button]:
                 # io.output(self.pin, False) # redundant
                 self._state = 0
         elif self._state == 2:
@@ -83,7 +85,7 @@ class LEDComponent(OutputComponent):
                 io.output(self.pin, False)
                 self._state = 1
         elif self._state == 3:
-            if !data_dict[self.button]:
+            if not data_dict[self.button]:
                 # io.output(self.pin, True) # redundant
                 self._state = 2
 
@@ -113,7 +115,7 @@ class MotorComponent(PCA9685Mixin, OutputComponent):
 
     PWM_FREQ = MOTOR_PWM_FREQ
 
-    def __init__(i2c_address, i2c_channel, feedback_pin, button_axis, reverse=False)
+    def __init__(i2c_address, i2c_channel, feedback_pin, button_axis, reverse=False):
         ''' Setup PCA9685, feedback pin, and button '''
 
         # Setup PCA9685

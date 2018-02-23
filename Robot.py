@@ -14,6 +14,9 @@ class Robot(object):
 
     def __init__(self):
 
+        # Set the GPIO numbering mode
+        io.setmode(GPIO_MODE)
+
         output_components = [
             LEDComponent(LED_0_BUTTON, LED_0_PIN),
             ServoComponent(0x40, 0, 'up', 'down', 4096, 0, 10),
@@ -73,7 +76,7 @@ class Robot(object):
         tasks = []
 
         for output in output_components:
-            tasks.append(asyncio.ensure_future(output.update(data_dict))
+            tasks.append(asyncio.ensure_future(output.update(data_dict)))
         
         await asyncio.gather(*tasks)
         

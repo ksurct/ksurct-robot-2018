@@ -3,9 +3,14 @@
     Define the settings to use for the robot and it's components
 '''
 
+import RPi.GPIO as io
+
 # Server Setings
 SERVER_IP = None
 SERVER_PORT = None
+
+# Motor settings
+MOTOR_PWM_FREQ = 1600
 
 # Drive Motor 0 settings
 DRIVE_MOTOR_0_P1 = None
@@ -20,6 +25,12 @@ DRIVE_MOTOR_1_P2 = None
 DRIVE_MOTOR_1_HIGH = None
 DRIVE_MOTOR_1_LOW = None
 DRIVE_MOTOR_1_REVERSE = None
+
+# Servo settings
+SERVO_PWM_FREQ = 60
+
+# LED/GPIO settings
+GPIO_MODE = io.BCM
 
 # LED 0 settings
 LED_0_BUTTON = 'a'
@@ -41,16 +52,3 @@ SENSOR_2_CHANNEL = None
 SENSOR_3_PIN = None
 SENSOR_3_CHANNEL = None
 
-# Steering Motor 0 settings
-STEER_MOTOR_0_P1 = None
-STEER_MOTOR_0_P2 = None
-STEER_MOTOR_0_HIGH = None
-STEER_MOTOR_0_LOW = None
-STEER_MOTOR_0_REVERSE = None
-
-# Steering Motor 1 settings
-STEER_MOTOR_1_P1 = None
-STEER_MOTOR_1_P2 = None
-STEER_MOTOR_1_HIGH = None
-STEER_MOTOR_1_LOW = None
-STEER_MOTOR_1_REVERSE = None
