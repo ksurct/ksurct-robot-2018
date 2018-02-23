@@ -49,7 +49,7 @@ class SensorComponent(InputComponent):
 
 class OutputComponent(Component):
 
-    def update(self, data):
+    async def update(self, data):
         raise NotImplementedError()
 
 
@@ -70,7 +70,7 @@ class LEDComponent(OutputComponent):
         ''' Turn off all pins '''
         io.output(self.pin, False)
 
-    def update(self, data_dict):
+    async def update(self, data_dict):
         ''' Update the state of the LED '''
         if self._state == 0:
             if data_dict[self.button]:
@@ -130,7 +130,7 @@ class MotorComponent(PCA9685Mixin, OutputComponent):
         ''' Stop motor '''
         self.set_pwm(0)
 
-    def update(self, data_dict):
+    async def update(self, data_dict):
         ''' Update the state of the motor based on the data_dict '''
         self.set_pwm(data_dict[self.button_axis])
 
@@ -186,7 +186,7 @@ class ServoComponent(PCA9685Mixin, OutputComponent):
 
         if data_dict[self.off_button]:
             if self.target - self.button_speed > self.min_pwm:
-                self.target -+ self.button_speed
+                self.target -= self.button_speed
             else:
                 self.target = self.min_pwm
 

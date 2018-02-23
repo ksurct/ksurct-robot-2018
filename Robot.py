@@ -19,7 +19,7 @@ class Robot(object):
 
         self.output_components = [
             LEDComponent(LED_0_BUTTON, LED_0_PIN),
-            ServoComponent(0x40, 0, 'up', 'down', 4096, 0, 10),
+            ServoComponent(0x40, 0, 'up', 'down', 4095, 0, 250),
             # Motors and servos too
         ]
 

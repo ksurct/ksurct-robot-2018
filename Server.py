@@ -1,5 +1,4 @@
-'''
-Server.py
+'''Server.py
 
 This is the server to be ran on the pi
 '''
@@ -28,7 +27,7 @@ class Server(object):
         self._active_connections = set()
         self.ip = ip
         self.port = port
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('__main__')
         self.server = None
         self.robot = robot
 
@@ -67,7 +66,7 @@ class Server(object):
                     self.logger.debug(message)
                     if message is not None:
                         # Load from the pickle and handle the message
-                        self.robot.update(pickle.loads(message))
+                        await self.robot.update(pickle.loads(message))
                         # Create a new task to be run in the event loop
                         consumer_task = asyncio.ensure_future(ws.recv())
                     else:

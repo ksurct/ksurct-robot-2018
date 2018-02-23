@@ -1,5 +1,4 @@
-'''
-Main.py
+'''Main.py
 
 This is the main controller file
 
@@ -17,10 +16,7 @@ def main():
     ''' Main Entrance to the program '''
 
     # Setup Logging
-    # Debug Mode
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    # Production Mode
-    # logging.basicConfig(filename='log.log', format='%(asctime)s %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
 
     # Get our logger
     logger = logging.getLogger(__name__)

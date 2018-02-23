@@ -12,7 +12,7 @@ import pickle
 
 import logging
 
-logging.basicConfig(format='%(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 IP = '129.130.46.4'
