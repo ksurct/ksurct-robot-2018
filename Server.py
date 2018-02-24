@@ -52,6 +52,8 @@ class Server(object):
 
             await asyncio.wait([consumer_task, producer_task], return_when=asyncio.FIRST_EXCEPTION)
 
+        except websockets.ConnectionClosed:
+            self.logger.info('Connection already closed')
         finally:
             # Stop robot
             self.logger.info('Stopping Robot')
@@ -60,7 +62,7 @@ class Server(object):
             # Close Connection
             if ws.open:
                 await ws.close()
-            self.logger.info('Connection closed: {}'.format(ws.remote_address))
+                self.logger.info('Closed connection: {}'.format(ws.remote_address))
 
             # Remove connection
             self._active_connections.remove(ws)
@@ -70,14 +72,14 @@ class Server(object):
         ''' Waits for a message from the client and
             passes that message to the robot, if it exsits
         '''
-        while ws.open:
+        while True:
             # Receive the message
             pickled_message = await ws.recv()
 
             # Use pickle to load the message
             message = pickle.loads(pickled_message)
 
-            self.logger.debug('Recieved: {}'.format(message))
+            self.logger.info('Recieved: {}'.format(message))
 
             # Update the robot if it exsits
             if self.robot:
@@ -87,18 +89,20 @@ class Server(object):
         ''' Waits for the robot to produce a message
             and then sends that message to the client
         '''
-        while ws.open:
+        while True:
             # Get the message from the robot, if it exsits
             if self.robot:
                 message = await self.robot.produce()
 
-                self.logger.debug("Sending: {}".format(message))
+                self.logger.info("Sending: {}".format(message))
 
                 # Use pickle to package the message
                 pickled_message = pickle.dumps(message)
 
                 # Send the message
                 await ws.send(pickled_message)
+            await asyncio.sleep(.5)
+
 
     async def shutdown(self):
         ''' Shutdown the server if it exsits '''
@@ -129,7 +133,7 @@ def test_server():
         loop.run_forever()
 
     except KeyboardInterrupt:
-        logger.warn('Keyboard Interrupt. Closing Connections...')
+        logger.info('Keyboard Interrupt. Closing...')
 
     finally:
         # Shutdown the server

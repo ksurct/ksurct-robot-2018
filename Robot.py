@@ -21,11 +21,11 @@ class Robot(object):
 
         # Connect to servo and motor pca9685 boards
         servo_pca9685 = PCA9685(SERVO_I2C_ADDRESS)
-        motor_pca9685 = PCA9685(MOTOR_I2C_ADDRESS)
+        # motor_pca9685 = PCA9685(MOTOR_I2C_ADDRESS)
 
         # Set pca9685 board frequencies
         servo_pca9685.set_pwm_freq(SERVO_PWM_FREQ)
-        motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
+        # motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
 
         self.output_components = [
             # Servos
@@ -59,8 +59,8 @@ class Robot(object):
 
     async def produce(self):
         ''' Wait for the sensors to read back a distance '''
-        while True:
-            await asyncio.sleep(1000)
+        await asyncio.sleep(.01)
+        return {'dummy_key':'dummy_value'}
 
         tasks = [asyncio.ensure_future(input_.produce()) for input_ in self.input_components]
 

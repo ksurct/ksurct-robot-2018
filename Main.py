@@ -15,7 +15,7 @@ def main():
     ''' Main Entrance to the program '''
 
     # Setup Logging
-    logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
     logger = logging.getLogger(__name__)
 
     # Get the event loop to work with
@@ -32,13 +32,9 @@ def main():
         loop.run_forever()
 
     except KeyboardInterrupt:
-        logger.warn('Keyboard Interrupt. Closing Connections...')
+        logger.info('Keyboard Interrupt. Closing...')
 
     finally:
-        # Stop the Robot
-        robot.stop()
-        logger.info('Robot stopped')
-
         # Shutdown the server
         task = asyncio.ensure_future(server.shutdown())
         loop.run_until_complete(task)
