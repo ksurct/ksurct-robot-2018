@@ -15,9 +15,7 @@ def main():
     ''' Main Entrance to the program '''
 
     # Setup Logging
-    logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
-
-    # Get our logger
+    logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.DEBUG)
     logger = logging.getLogger(__name__)
 
     # Get the event loop to work with
@@ -34,7 +32,7 @@ def main():
         loop.run_forever()
 
     except KeyboardInterrupt:
-        logger.info('Keyboard Interrupt. Closing Connections...')
+        logger.warn('Keyboard Interrupt. Closing Connections...')
 
     finally:
         # Stop the Robot

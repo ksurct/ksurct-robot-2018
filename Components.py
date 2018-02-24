@@ -6,9 +6,6 @@
 import asyncio
 
 import RPi.GPIO as io
-from Adafruit_PCA9685 import PCA9685
-
-from Settings import MOTOR_PWM_FREQ, SERVO_PWM_FREQ
 
 
 class Component(object):
@@ -90,34 +87,17 @@ class LEDComponent(OutputComponent):
                 self._state = 2
 
 
-class PCA9685Mixin(object):
-    ''' When a Component class inherites from this this class 
-        it gains the ability to communicate over i2c to the 
-        PCA9685 board
-    '''
+class MotorComponent(OutputComponent):
 
-    def __init__(self, i2c_address, i2c_channel, i2c_freq):
-        ''' Creates a PCA9685 object and to send '''
-        self.i2c_board = PCA9685(i2c_address)
-        self.i2c_board.set_pwm_freq(i2c_freq)
-
-        self.i2c_channel = i2c_channel
-
-    def set_pwm(self, value):
-        ''' Use i2c to set the pwm on self.i2c_channel '''
-        self.i2c_board.set_pwm(self.i2c_channel, 0, value)
-
-
-class MotorComponent(PCA9685Mixin, OutputComponent):
-
-    def __init__(i2c_address, i2c_channel, feedback_pin, button_axis, reverse=False):
+    def __init__(pca9685, pca9685_channel, feedback_pin, button_axis, reverse=False):
         ''' Setup PCA9685, feedback pin, and button '''
 
         # Setup PCA9685
-        super().__init__(i2c_address, i2c_channel, MOTOR_PWM_FREQ)
+        self.pca9685 = pca9685
+        self.pca9685_channel = pca9685_channel
 
         # Setup feedback pin
-        io.setup(feedback_pin, io.OUT)
+        io.setup(feedback_pin, io.IN)
         self.feedback_pin
 
         # Setup button
@@ -128,22 +108,21 @@ class MotorComponent(PCA9685Mixin, OutputComponent):
 
     def stop(self):
         ''' Stop motor '''
-        self.set_pwm(0)
+        self.pca9685.set_pwm(self.pca9685_channel, 0, 0)
 
     async def update(self, data_dict):
         ''' Update the state of the motor based on the data_dict '''
-        self.set_pwm(data_dict[self.button_axis])
+        self.pca9685.set_pwm(self.pca9685_channel, 0, data_dict[self.button_axis])
 
 
-class ServoComponent(PCA9685Mixin, OutputComponent):
+class ServoComponent(OutputComponent):
 
-    PWM_FREQ = SERVO_PWM_FREQ
-
-    def __init__(self, i2c_address, i2c_channel, on_button, off_button, max_pwm, min_pwm, button_speed):
+    def __init__(self, pca9685, pca9685_channel, on_button, off_button, max_pwm, min_pwm, button_speed):
         ''' Setup PCA9685 and button logic '''
 
         # Setup PCA9685
-        super().__init__(i2c_address, i2c_channel, SERVO_PWM_FREQ)
+        self.pca9685 = pca9685
+        self.pca9685_channel = pca9685_channel
 
         # Setup button
         self.on_button = on_button
@@ -181,8 +160,8 @@ class ServoComponent(PCA9685Mixin, OutputComponent):
         if data_dict[self.on_button]:
             self.target = min(self.target + self.button_speed, self.max_pwm)
 
-        if data_dict[self.off_button]:
+        elif data_dict[self.off_button]:
             self.target = max(self.target - self.button_speed, self.min_pwm)
 
-        self.set_pwm(self.target)
+        self.pca9685.set_pwm(self.pca9685_channel, 0, self.target)
 

@@ -5,6 +5,8 @@
 
 import asyncio
 
+from Adafruit_PCA9685 import PCA9685
+
 from Components import *
 from Settings import *
 
@@ -17,10 +19,23 @@ class Robot(object):
         # Set the GPIO numbering mode
         io.setmode(GPIO_MODE)
 
+        # Connect to servo and motor pca9685 boards
+        servo_pca9685 = PCA9685(SERVO_I2C_ADDRESS)
+        motor_pca9685 = PCA9685(MOTOR_I2C_ADDRESS)
+
+        # Set pca9685 board frequencies
+        servo_pca9685.set_pwm_freq(SERVO_PWM_FREQ)
+        motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
+
         self.output_components = [
-            LEDComponent(LED_0_BUTTON, LED_0_PIN),
-            ServoComponent(0x40, 0, 'up', 'down', 4096, 0, 250),
-            # Motors and servos too
+            # Servos
+            ServoComponent(servo_pca9685, SERVO_0_CHANNEL, SERVO_0_ON_BUTTON, SERVO_0_OFF_BUTTON,
+                            SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
+            ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_ON_BUTTON, SERVO_1_OFF_BUTTON,
+                            SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
+
+            # LED
+            LEDComponent(LED_BUTTON, LED_PIN),
         ]
 
         # check output components

@@ -77,7 +77,7 @@ class Server(object):
             # Use pickle to load the message
             message = pickle.loads(pickled_message)
 
-            self.logger.info('Recieved: {}'.format(message))
+            self.logger.debug('Recieved: {}'.format(message))
 
             # Update the robot if it exsits
             if self.robot:
@@ -93,7 +93,7 @@ class Server(object):
             if self.robot:
                 message = await self.robot.produce()
 
-                self.logger.info("Sending: {}".format(message))
+                self.logger.debug("Sending: {}".format(message))
 
                 # Use pickle to package the message
                 pickled_message = pickle.dumps(message)

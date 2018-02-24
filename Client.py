@@ -9,14 +9,12 @@ from contextlib import suppress
 from concurrent.futures import CancelledError
 from xbox import Controller
 import pickle
-
 import logging
 
-logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
+from Settings import SERVER_IP, SERVER_PORT
 
-IP = '129.130.46.4'
-PORT = 8055
+IP = SERVER_IP
+PORT = SERVER_PORT
 
 DELAY_TIME = 1
 
@@ -25,9 +23,7 @@ Controller.init()
 controller = Controller(0)
 
 async def SendMessage():
-    '''
-        Send the state of the controller to the server
-    '''
+    ''' Send the state of the controller to the server '''
     
     # Try to reconect to the server on failure
     while True:
@@ -37,7 +33,8 @@ async def SendMessage():
             logger.warn('Connection Refused at {0}:{1}, trying again'.format(IP, PORT))
             await asyncio.sleep(DELAY_TIME)
         else:
-            break
+            if websocket.open:
+                break
     
     logger.info('Connected to server at: {0}'.format(str(websocket.remote_address)))
 
@@ -79,18 +76,6 @@ async def SendMessage():
             robot['up'] = 1 if str(controller.hat).strip() == 'u' else 0
             robot['down'] = 1 if str(controller.hat).strip() == 'd' else 0
 
-            # # Left bumper combinations
-            # robot['lbx'] = 1 if controller.left_bumper() and controller.x() else 0
-            # robot['lby'] = 1 if controller.left_bumper() and controller.y() else 0
-            # robot['lbb'] = 1 if controller.left_bumper() and controller.b() else 0
-            # robot['lba'] = 1 if controller.left_bumper() and controller.a() else 0
-
-            # # Right bumper combinations
-            # robot['rbx'] = 1 if controller.right_bumper() and controller.x() else 0
-            # robot['rby'] = 1 if controller.right_bumper() and controller.y() else 0
-            # robot['rbb'] = 1 if controller.right_bumper() and controller.b() else 0
-            # robot['rba'] = 1 if controller.right_bumper() and controller.a() else 0
-
             # Send the robot state
             if(robot):
                 logger.debug('Sending: {}'.format(robot))
@@ -108,7 +93,14 @@ async def SendMessage():
         logger.info('Connection closed to: {}'.format(websocket.remote_address))
 
 def main():
+
+    # Setup Logging
+    logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+
+    # Get the event loop to work with
     loop = asyncio.get_event_loop()
+
     try:
         current_task = asyncio.ensure_future(SendMessage())
         loop.run_until_complete(current_task)
