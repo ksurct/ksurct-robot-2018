@@ -87,7 +87,6 @@ class Server(object):
         ''' Waits for the robot to produce a message
             and then sends that message to the client
         '''
-
         while ws.open:
             # Get the message from the robot, if it exsits
             if self.robot:
