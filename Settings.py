@@ -3,7 +3,11 @@
     Define the settings to use for the robot and it's components
 '''
 
-import RPi.GPIO as io
+try:
+    import RPi.GPIO as io
+except ImportError:
+    io = None
+
 
 ##############################################################
 
@@ -70,7 +74,8 @@ MOTOR_3_REVERSE = None
 ##############################################################
 
 # GPIO settings
-GPIO_MODE = io.BCM
+if io:
+    GPIO_MODE = io.BCM
 
 # LED settings
 LED_BUTTON = 'a'
