@@ -5,7 +5,7 @@ io.setmode(io.BCM)
 
 io.setup(21, io.IN)
 
-while(true):
-    print(io.INPUT(21))
+while(1):
+    print(io.input(21))
     sleep(1)
 
