@@ -1,3 +1,8 @@
+''' xbox.py
+
+    Responsable for getting information directly from controller
+'''
+
 from math import isclose
 from collections import namedtuple
 import  sdl2
