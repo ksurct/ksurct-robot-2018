@@ -1,3 +1,8 @@
+''' xbox.py
+
+    Responsable for getting information directly from controller
+'''
+
 from math import isclose
 from collections import namedtuple
 import  sdl2
@@ -260,35 +265,57 @@ def Test():
     Controller.init()
     controller = Controller(0)
     while True:
-        time.sleep(1)
+
+        # time.sleep(1)
+        
         controller.update()
-        l_stick = round(controller.left_x(), 1)
-        r_stick = round(controller.right_y(), 1)
+
         robot = {}
-        oldRobot = {}
+
+        # General buttons
         robot['x'] = 1 if controller.x() else 0
         robot['y'] = 1 if controller.y() else 0
         robot['a'] = 1 if controller.a() else 0
         robot['b'] = 1 if controller.b() else 0
-        robot['fwd'] = int(controller.right_trigger() >> 3)  # To implement turning, we will want to grab the left stick and adjust Fwd/Rev appropriately.
-        robot['rev'] = int(controller.left_trigger() >> 3)
-        robot['lstick'] = int(10*l_stick) if abs(l_stick) > 0.1 else 0
-        robot['vision'] = 1 if str(controller.hat).strip() == 'd' else 0
-        robot['peek'] = 1 if str(controller.hat).strip() == 'u' else 0
-        robot['rstick'] = int(-10*r_stick) if abs(r_stick) > 0.1 else 0
-        robot['lbump'] = 1 if controller.left_bumper() else 0
+        
+        # Triggers
+        robot['r_trigger'] = int(controller.right_trigger() >> 3)
+        robot['l_trigger'] = int(controller.left_trigger() >> 3)
 
-        # This needs testing, but logic seems in order.
-        robot['lbx'] = 1 if controller.left_bumper() and controller.x() else 0
-        robot['lbb'] = 1 if controller.left_bumper() and controller.b() else 0
-        robot['lby'] = 1 if controller.left_bumper() and controller.y() else 0
-        robot['lba'] = 1 if controller.left_bumper() and controller.a() else 0
-        robot['rby'] = 1 if controller.right_bumper() and controller.y() else 0
-        robot['rba'] = 1 if controller.right_bumper() and controller.a() else 0
-        # If leftStick.X < 0 then we want to trim off the left motor to turn left.
-        # If leftStick.X > 0 then we want to trim off the right motor to turn right.
-        robot['valid'] = 1  # Was testing not spamming controller but that is impossible.
-        print(robot)
+        # Analog sticks
+        r_stick_x = round(controller.right_x(), 1)
+        r_stick_y = round(controller.right_y(), 1)
+        l_stick_x = round(controller.left_x(), 1)
+        l_stick_y = round(controller.left_y(), 1)
+        robot['r_stick'] = (int(10*r_stick_x) if abs(r_stick_x) > 0.1 else 0,
+                            int(-10*r_stick_y) if abs(r_stick_y) > 0.1 else 0 )
+        robot['l_stick'] = (int(10*l_stick_x) if abs(l_stick_x) > 0.1 else 0,
+                            int(-10*l_stick_y) if abs(l_stick_y) > 0.1 else 0 )
+        
+        # Bumpers
+        robot['r_bump'] = 1 if controller.right_bumper() else 0
+        robot['l_bump'] = 1 if controller.left_bumper() else 0
+        
+        # D-pad
+        robot['left'] = 1 if str(controller.hat).strip() == 'l' else 0
+        robot['right'] = 1 if str(controller.hat).strip() == 'r' else 0
+        robot['up'] = 1 if str(controller.hat).strip() == 'u' else 0
+        robot['down'] = 1 if str(controller.hat).strip() == 'd' else 0
+
+        # # Left bumper combinations
+        # robot['lbx'] = 1 if controller.left_bumper() and controller.x() else 0
+        # robot['lby'] = 1 if controller.left_bumper() and controller.y() else 0
+        # robot['lbb'] = 1 if controller.left_bumper() and controller.b() else 0
+        # robot['lba'] = 1 if controller.left_bumper() and controller.a() else 0
+
+        # # Right bumper combinations
+        # robot['rbx'] = 1 if controller.right_bumper() and controller.x() else 0
+        # robot['rby'] = 1 if controller.right_bumper() and controller.y() else 0
+        # robot['rbb'] = 1 if controller.right_bumper() and controller.b() else 0
+        # robot['rba'] = 1 if controller.right_bumper() and controller.a() else 0
+
+        if(robot):
+            print(robot)
         
 
 

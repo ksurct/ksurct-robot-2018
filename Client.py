@@ -1,71 +1,171 @@
+''' Client.py
+
+    Send controller info to the server
 '''
-Client.py
-'''
+
 import websockets
 import asyncio
 from contextlib import suppress
+from concurrent.futures import CancelledError
 from xbox import Controller
 import pickle
-import sys
-
 import logging
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
-Controller.init()
-controller = Controller(0)
-oldRobot = {'john': 34, 'bob':99}
+from Settings import SERVER_IP, SERVER_PORT
+
+TIMEOUT_DELAY = 5
+DELAY_TIME = 1
 
 
-async def SendMessage():
-    '''
-        Send the state of the controller to the server
-    '''
-    #ws://127.0.0.1:8055/ # zerotier IP of server
-    logging.debug('pre IP connect')
-    websocket = await websockets.connect('ws://129.130.46.36:8055')
-    logging.info('Sent message')
-    try:
+class Client(object):
+
+    def __init__(self, ip, port):
+
+        # Initalize controller number 0
+        Controller.init()
+        self.controller = Controller(0)
+        self.logger = logging.getLogger(__name__)
+        self.ws = None
+        self.ip = ip
+        self.port = port
+
+    async def start_client(self):
+        ''' Setup Client '''
+        # while True:
+        await self.connect()
+        await self.handle_connection()
+
+    async def connect(self):
+        ''' Connect to server at ip and port, try to reconect on failure '''
         while True:
-            controller.update()
-            l_stick = round(controller.left_x(), 1)
-            r_stick = round(controller.right_y(), 1)
-            robot = {}
-            oldRobot = {}
-            robot['x'] = 1 if controller.x() else 0
-            robot['y'] = 1 if controller.y() else 0
-            robot['a'] = 1 if controller.a() else 0
-            robot['b'] = 1 if controller.b() else 0
-            robot['fwd'] = int(controller.right_trigger() >> 3)  # To implement turning, we will want to grab the left stick and adjust Fwd/Rev appropriately.
-            robot['rev'] = int(controller.left_trigger() >> 3)
-            robot['lstick'] = int(10*l_stick) if abs(l_stick) > 0.1 else 0
-            robot['vision'] = 1 if str(controller.hat).strip() == 'd' else 0
-            robot['peek'] = 1 if str(controller.hat).strip() == 'u' else 0
-            robot['rstick'] = int(-10*r_stick) if abs(r_stick) > 0.1 else 0
-            robot['lbump'] = 1 if controller.left_bumper() else 0
+            try:
+                ws = await asyncio.wait_for(websockets.connect('ws://{0}:{1}'.format(self.ip, self.port)), TIMEOUT_DELAY)
+            except ConnectionRefusedError:
+                self.logger.info('Connection Refused at {0}:{1}, trying again'.format(self.ip, self.port))
+                await asyncio.sleep(DELAY_TIME)
+            except asyncio.TimeoutError:
+                self.logger.info('Connection to {0}:{1} timed out, trying again'.format(self.ip, self.port))
+            else:
+                if ws.open:
+                    self.logger.info('Connected to server at: {0}'.format(str(ws.remote_address)))
+                    self.ws = ws
+                    return
 
-            # This needs testing, but logic seems in order.
-            robot['lbx'] = 1 if controller.left_bumper() and controller.x() else 0
-            robot['lbb'] = 1 if controller.left_bumper() and controller.b() else 0
-            robot['lby'] = 1 if controller.left_bumper() and controller.y() else 0
-            robot['lba'] = 1 if controller.left_buof obmper() and controller.a() else 0
-            robot['rby'] = 1 if controller.right_bumper() and controller.y() else 0
-            robot['rba'] = 1 if controller.right_bumper() and controller.a() else 0
-            # If leftStick.X < 0 then we want to trim off the left motor to turn left.
-            # If leftStick.X > 0 then we want to trim off the right motor to turn right.
-            robot['valid'] = 1  # Was testing not spamming controller but that is impossible.
+    async def handle_connection(self):
+        ''' Maintain send and receive task with the server '''
+        while True:
+            try:
+                sender_task = asyncio.ensure_future(self.sender())
+                receiver_task = asyncio.ensure_future(self.receiver())
 
-            if(robot):
-                print(robot)
-                await websocket.send(pickle.dumps(robot))
-                oldRobot = robot
-            with suppress(asyncio.TimeoutError):
-                response = await asyncio.wait_for(websocket.recv(), .1) #the number here is how fast it refreshes
+                await asyncio.wait([sender_task, receiver_task], return_when=asyncio.FIRST_EXCEPTION)
 
-    finally:
-        await websocket.close()
+            except CancelledError:
+                pass
+
+            except websockets.ConnectionClosed:
+                # Close the connection
+                self.logger.info('Server closed connection')
+                if self.ws.open:
+                    await self.ws.close()
+                self.logger.info('Connection closed to: {}'.format(self.ws.remote_address))
+                break
+
+#            finally:
+            await self.connect()
+
+    async def sender(self):
+        ''' Handle data that needs to be sent to the server '''
+        while self.ws.open:
+            # Get updated controller data
+            controller_data = self.get_controller_data()
+
+            if controller_data:
+                self.logger.info('Sending: {}'.format(controller_data))
+
+                pickled_message = pickle.dumps(controller_data)
+
+                await self.ws.send(pickled_message)
+            await asyncio.sleep(1)
+
+    async def receiver(self):
+        ''' Handle data from the server '''
+        while self.ws.open:
+            # Get data from server
+            pickled_message = await self.ws.recv()
+
+            message = pickle.loads(pickled_message)
+
+            self.logger.info('Received: {}'.format(message))
+
+    async def shutdown(self):
+        if ws.open:
+            await ws.close()
+
+    def get_controller_data(self):
+        # Create the dictionary to send
+        controller_data = {}
+
+        # update the controller object
+        self.controller.update()
+
+        # General buttons
+        controller_data['x'] = 1 if self.controller.x() else 0
+        controller_data['y'] = 1 if self.controller.y() else 0
+        controller_data['a'] = 1 if self.controller.a() else 0
+        controller_data['b'] = 1 if self.controller.b() else 0
+
+        # Triggers
+        controller_data['r_trigger'] = int(self.controller.right_trigger() >> 3)
+        controller_data['l_trigger'] = int(self.controller.left_trigger() >> 3)
+
+        # Analog sticks
+        r_stick_x = round(self.controller.right_x(), 1)
+        r_stick_y = round(self.controller.right_y(), 1)
+        l_stick_x = round(self.controller.left_x(), 1)
+        l_stick_y = round(self.controller.left_y(), 1)
+        controller_data['r_stick'] = (int(10*r_stick_x) if abs(r_stick_x) > 0.1 else 0,
+                            int(-10*r_stick_y) if abs(r_stick_y) > 0.1 else 0 )
+        controller_data['l_stick'] = (int(10*l_stick_x) if abs(l_stick_x) > 0.1 else 0,
+                            int(-10*l_stick_y) if abs(l_stick_y) > 0.1 else 0 )
+
+        # Bumpers
+        controller_data['r_bump'] = 1 if self.controller.right_bumper() else 0
+        controller_data['l_bump'] = 1 if self.controller.left_bumper() else 0
+
+        # D-pad
+        controller_data['left'] = 1 if str(self.controller.hat).strip() == 'l' else 0
+        controller_data['right'] = 1 if str(self.controller.hat).strip() == 'r' else 0
+        controller_data['up'] = 1 if str(self.controller.hat).strip() == 'u' else 0
+        controller_data['down'] = 1 if str(self.controller.hat).strip() == 'd' else 0
+
+        return controller_data
+
 
 def main():
-    asyncio.get_event_loop().run_until_complete(SendMessage())
+
+    # Setup Logging
+    logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
+    # Get the event loop to work with
+    loop = asyncio.get_event_loop()
+
+    # Create client that will talk to the server
+    client = Client(SERVER_IP, SERVER_PORT)
+
+    try:
+        current_task = asyncio.ensure_future(client.start_client())
+        loop.run_until_complete(current_task)
+    except KeyboardInterrupt:
+        logger.info('Keyboard Interrupt. Closing...')
+
+        # Cancel tasks
+        current_task.cancel() # Set task to be cancelled
+#        loop.run_forever() # This line actually cancels the task
+
+    finally:
+        loop.close()
 
 if __name__ == '__main__':
     main()
