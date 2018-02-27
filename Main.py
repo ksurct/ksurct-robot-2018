@@ -1,8 +1,6 @@
-'''
-Main.py
+''' Main.py
 
-This is the main controller file
-
+    This is the main controller file
 '''
 
 import asyncio
@@ -14,16 +12,10 @@ from Settings import *
 
 
 def main():
-    '''
-        Main Entrance to the program
-    '''
-    # Setup Logging
-    # Debug Mode
-    logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-    # Production Mode
-    # logging.basicConfig(filename='log.log', format='%(asctime)s %(message)s', level=logging.INFO)
+    ''' Main Entrance to the program '''
 
-    # Get our logger
+    # Setup Logging
+    logging.basicConfig(format='%(name)s: %(levelname)s: %(asctime)s: %(message)s', level=logging.INFO)
     logger = logging.getLogger(__name__)
 
     # Get the event loop to work with
@@ -33,20 +25,16 @@ def main():
     robot = Robot()
 
     server = Server(SERVER_IP, SERVER_PORT, robot)
-    
+
     try:
         # Main event loop
         loop.run_until_complete(server.start_server())
         loop.run_forever()
 
     except KeyboardInterrupt:
-        logger.info('Keyboard Interrupt. Closing Connections...')
-    
-    finally:
-        # Stop the Robot
-        robot.stop()
-        logger.info('Robot stopped')
+        logger.info('Keyboard Interrupt. Closing...')
 
+    finally:
         # Shutdown the server
         task = asyncio.ensure_future(server.shutdown())
         loop.run_until_complete(task)
