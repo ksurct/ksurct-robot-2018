@@ -1,4 +1,4 @@
-''' Server.py
+''' server.py
 
     This is the server to be ran on the pi
 '''
