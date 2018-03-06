@@ -53,7 +53,7 @@ class SensorComponent(InputComponent):
 
     def stop(self):
         ''' Close SCI connection '''
-        MAX192AEPP.close_connection()
+        pass
 
 
 class OutputComponent(Component):
