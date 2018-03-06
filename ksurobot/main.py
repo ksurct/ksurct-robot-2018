@@ -1,14 +1,14 @@
-''' Main.py
+''' main.py
 
-    This is the main controller file
+    Starts the program
 '''
 
 import asyncio
 import websockets
 import logging
-from Server import Server
-from Robot import Robot
-from Settings import *
+from server import Server
+from robot import Robot
+from settings import *
 
 
 def main():

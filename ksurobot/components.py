@@ -1,4 +1,4 @@
-''' Components.py
+''' components.py
 
     Define components and how they should work for the robot
 '''

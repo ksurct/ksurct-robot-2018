@@ -1,7 +1,9 @@
-''' Settings.py
+''' settings.py
 
     Define the settings to use for the robot and it's components
 '''
+
+from .robot import Robot
 
 try:
     import RPi.GPIO as io

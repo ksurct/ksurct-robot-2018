@@ -1,4 +1,4 @@
-''' Robot.py
+''' robot.py
 
     Describe what components the robot is made of
 '''
@@ -7,8 +7,8 @@ import asyncio
 
 from Adafruit_PCA9685 import PCA9685
 
-from Components import *
-from Settings import *
+from components import *
+from settings import *
 
 
 class Robot(object):
