@@ -31,8 +31,9 @@ class SensorComponent(InputComponent):
         and then converts that to a distance
     '''
 
-    def __init__(self, channel, coefficients):
+    def __init__(self, name, channel, coefficients):
         ''' Setup channel and coefficients '''
+        self.name = name
         self.channel = channel
         self.coefficients = coefficients
 
@@ -48,7 +49,7 @@ class SensorComponent(InputComponent):
 
     async def produce(self):
         ''' Async funtion to read sensor data on channel from SCI '''
-        return self._convert_to_distance(self._get_value())
+        return self.name, self._convert_to_distance(self._get_value())
 
     def stop(self):
         ''' Close SCI connection '''

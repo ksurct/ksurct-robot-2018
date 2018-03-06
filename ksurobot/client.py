@@ -86,7 +86,7 @@ class Client(object):
                 pickled_message = pickle.dumps(controller_data)
 
                 await self.ws.send(pickled_message)
-            await asyncio.sleep(1)
+            await asyncio.sleep(.1)
 
     async def receiver(self):
         ''' Handle data from the server '''
