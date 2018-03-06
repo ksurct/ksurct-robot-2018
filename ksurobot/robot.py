@@ -50,12 +50,12 @@ class Robot(object):
             SensorComponent(SENSOR_4_CHANNEL, SENSOR_4_COEFFICIENTS),
             SensorComponent(SENSOR_5_CHANNEL, SENSOR_5_COEFFICIENTS),
             SensorComponent(SENSOR_6_CHANNEL, SENSOR_6_COEFFICIENTS),
-            SensorComponent(SENSOR_7_CHANNEL, SENSOR_7_COEFFICIENTS),,
+            SensorComponent(SENSOR_7_CHANNEL, SENSOR_7_COEFFICIENTS),
         ]
 
         # check input components
         for input_ in self.input_components:
-            assert isinstance(intput_, InputComponent)
+            assert isinstance(input_, InputComponent)
 
     async def produce(self):
         ''' Wait for the sensors to read back a distance '''
