@@ -86,19 +86,35 @@ LED_PIN = 20
 ##############################################################
 
 # Sensor 0 settings
-SENSOR_0_PIN = None
 SENSOR_0_CHANNEL = None
+SENSOR_0_COEFFICIENTS = []
 
 # Sensor 1 settings
-SENSOR_1_PIN = None
 SENSOR_1_CHANNEL = None
+SENSOR_1_COEFFICIENTS = []
 
 # Sensor 2 settings
-SENSOR_2_PIN = None
 SENSOR_2_CHANNEL = None
+SENSOR_2_COEFFICIENTS = []
 
 # Sensor 3 settings
-SENSOR_3_PIN = None
 SENSOR_3_CHANNEL = None
+SENSOR_3_COEFFICIENTS = []
+
+# Sensor 4 settings
+SENSOR_4_CHANNEL = None
+SENSOR_4_COEFFICIENTS = []
+
+# Sensor 5 settings
+SENSOR_5_CHANNEL = None
+SENSOR_5_COEFFICIENTS = []
+
+# Sensor 6 settings
+SENSOR_6_CHANNEL = None
+SENSOR_6_COEFFICIENTS = []
+
+# Sensor 7 settings
+SENSOR_7_CHANNEL = None
+SENSOR_7_COEFFICIENTS = []
 
 ##############################################################

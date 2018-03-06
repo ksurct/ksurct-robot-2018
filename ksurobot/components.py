@@ -27,9 +27,9 @@ class InputComponent(Component):
 
 class SensorComponent(InputComponent):
 
-    def __init__(self, pin, channel):
-        self.pin = pin
+    def __init__(self, channel, coefficients):
         self.channel = channel
+        self.coefficients = coefficients
 
     def convert_to_distance(voltage):
         ''' Take the voltage read on the sensor and return the distance '''
