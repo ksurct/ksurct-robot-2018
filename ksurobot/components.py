@@ -7,6 +7,7 @@ import asyncio
 
 import RPi.GPIO as io
 
+from hardware import MAX192AEPP
 
 class Component(object):
 
@@ -26,22 +27,32 @@ class InputComponent(Component):
 
 
 class SensorComponent(InputComponent):
+    ''' Input Component that reads a voltage from a adc
+        and then converts that to a distance
+    '''
 
     def __init__(self, channel, coefficients):
+        ''' Setup channel and coefficients '''
         self.channel = channel
         self.coefficients = coefficients
 
-    def convert_to_distance(voltage):
-        ''' Take the voltage read on the sensor and return the distance '''
-        raise NotImplementedError()
+    def _convert_to_distance(self, voltage):
+        ''' Take the voltage read on the sensor and return
+            the distance based on the coefficients '''
+        # Not complete
+        return voltage
+
+    def _get_value(self):
+        ''' Get the raw value from the adc about the sensor '''
+        return MAX192AEPP.read_channel(self.channel)
 
     async def produce(self):
         ''' Async funtion to read sensor data on channel from SCI '''
-        raise NotImplementedError()
+        return self._convert_to_distance(self._get_value())
 
     def stop(self):
         ''' Close SCI connection '''
-        raise NotImplementedError()
+        MAX192AEPP.close_connection()
 
 
 class OutputComponent(Component):

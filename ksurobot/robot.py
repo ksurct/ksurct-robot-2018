@@ -59,8 +59,6 @@ class Robot(object):
 
     async def produce(self):
         ''' Wait for the sensors to read back a distance '''
-        await asyncio.sleep(.01)
-        return {'dummy_key':'dummy_value'}
 
         tasks = [asyncio.ensure_future(input_.produce()) for input_ in self.input_components]
 

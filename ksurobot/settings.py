@@ -3,8 +3,6 @@
     Define the settings to use for the robot and it's components
 '''
 
-from .robot import Robot
-
 try:
     import RPi.GPIO as io
 except ImportError:
@@ -85,36 +83,40 @@ LED_PIN = 20
 
 ##############################################################
 
+SPI_DEVICE = 0
+
+##############################################################
+
 # Sensor 0 settings
-SENSOR_0_CHANNEL = None
+SENSOR_0_CHANNEL = 0
 SENSOR_0_COEFFICIENTS = []
 
 # Sensor 1 settings
-SENSOR_1_CHANNEL = None
+SENSOR_1_CHANNEL = 1
 SENSOR_1_COEFFICIENTS = []
 
 # Sensor 2 settings
-SENSOR_2_CHANNEL = None
+SENSOR_2_CHANNEL = 2
 SENSOR_2_COEFFICIENTS = []
 
 # Sensor 3 settings
-SENSOR_3_CHANNEL = None
+SENSOR_3_CHANNEL = 3
 SENSOR_3_COEFFICIENTS = []
 
 # Sensor 4 settings
-SENSOR_4_CHANNEL = None
+SENSOR_4_CHANNEL = 4
 SENSOR_4_COEFFICIENTS = []
 
 # Sensor 5 settings
-SENSOR_5_CHANNEL = None
+SENSOR_5_CHANNEL = 5
 SENSOR_5_COEFFICIENTS = []
 
 # Sensor 6 settings
-SENSOR_6_CHANNEL = None
+SENSOR_6_CHANNEL = 6
 SENSOR_6_COEFFICIENTS = []
 
 # Sensor 7 settings
-SENSOR_7_CHANNEL = None
+SENSOR_7_CHANNEL = 7
 SENSOR_7_COEFFICIENTS = []
 
 ##############################################################
