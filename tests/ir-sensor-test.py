@@ -29,8 +29,9 @@ try:
         # spi.writebytes([0x8F])
         # rb1 = spi.readbytes(1)
         resp = spi.xfer2([0x8f, 0, 0])
-        data = (resp[1]<<5) + resp[2]>>3
-        print(hex(resp[0]), hex(resp[1]), hex(resp[2]))
+        print(bin(resp[1]<<5), bin(resp[2]>>3))
+        data = (resp[1]<<5) + (resp[2]>>3)
+        print(bin(resp[0]), bin(resp[1]), bin(resp[2]))
         print(data)
 
         time.sleep(.1) # sleep for 0.25 seconds

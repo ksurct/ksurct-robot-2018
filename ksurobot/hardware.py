@@ -15,7 +15,7 @@ def build_read_command(channel):
 
 def process_response(response):
     ''' Return the first 10 bits received back from the adc after 10 zeros '''
-    return (response[1]<<5) + response[2]>>3
+    return (response[1]<<5) + (response[2]>>3)
 
 
 class MAX192AEPP(object):
@@ -34,7 +34,7 @@ class MAX192AEPP(object):
 def test():
     try:
         while True:
-            for channel in range(0, 7):
+            for channel in range(0, 8):
                 print(channel, MAX192AEPP.read_channel(channel))
 
     except KeyboardInterrupt:
