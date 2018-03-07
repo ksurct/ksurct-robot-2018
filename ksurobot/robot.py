@@ -43,24 +43,22 @@ class Robot(object):
             assert isinstance(output, OutputComponent)
 
         self.input_components = [
-            # SensorComponent(SENSOR_0_PIN, SENSOR_0_CHANNEL),
-            # SensorComponent(SENSOR_1_PIN, SENSOR_1_CHANNEL),
-            # SensorComponent(SENSOR_2_PIN, SENSOR_2_CHANNEL),
-            # SensorComponent(SENSOR_3_PIN, SENSOR_3_CHANNEL),
-            # SensorComponent(SENSOR_4_PIN, SENSOR_4_CHANNEL),
-            # SensorComponent(SENSOR_5_PIN, SENSOR_5_CHANNEL),
-            # SensorComponent(SENSOR_6_PIN, SENSOR_6_CHANNEL),
-            # SensorComponent(SENSOR_7_PIN, SENSOR_7_CHANNEL),
+            SensorComponent(SENSOR_0_NAME, SENSOR_0_CHANNEL, SENSOR_0_COEFFICIENTS),
+            SensorComponent(SENSOR_1_NAME, SENSOR_1_CHANNEL, SENSOR_1_COEFFICIENTS),
+            SensorComponent(SENSOR_2_NAME, SENSOR_2_CHANNEL, SENSOR_2_COEFFICIENTS),
+            SensorComponent(SENSOR_3_NAME, SENSOR_3_CHANNEL, SENSOR_3_COEFFICIENTS),
+            SensorComponent(SENSOR_4_NAME, SENSOR_4_CHANNEL, SENSOR_4_COEFFICIENTS),
+            SensorComponent(SENSOR_5_NAME, SENSOR_5_CHANNEL, SENSOR_5_COEFFICIENTS),
+            SensorComponent(SENSOR_6_NAME, SENSOR_6_CHANNEL, SENSOR_6_COEFFICIENTS),
+            SensorComponent(SENSOR_7_NAME, SENSOR_7_CHANNEL, SENSOR_7_COEFFICIENTS),
         ]
 
         # check input components
         for input_ in self.input_components:
-            assert isinstance(intput_, InputComponent)
+            assert isinstance(input_, InputComponent)
 
     async def produce(self):
         ''' Wait for the sensors to read back a distance '''
-        await asyncio.sleep(.01)
-        return {'dummy_key':'dummy_value'}
 
         tasks = [asyncio.ensure_future(input_.produce()) for input_ in self.input_components]
 
@@ -68,13 +66,14 @@ class Robot(object):
         done, pending = await asyncio.wait(tasks)
 
         # Package all results into a dictionary
-        result = {}
+        data_dict = {}
 
         for task in done:
-            print(task.result())
+            key, value = task.result()
+            data_dict[key] = value
 
         # return the dictionary
-        return result
+        return data_dict
 
     def stop(self):
         ''' Stop the Robot's components '''
