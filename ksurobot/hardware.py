@@ -6,12 +6,13 @@ from settings import SPI_DEVICE
 spi = spidev.SpiDev()
 spi.open(0, SPI_DEVICE)
 spi.max_speed_hz = 500000
-
+MAX192AEPP_CHANNEL_TO_COMMAND = [0,4,1,5,2,6,3,7]
 
 def build_read_command(channel):
     ''' Create the command to send to the adc '''
     base_byte = 0x8f
-    return [base_byte|(channel<<4), 0, 0]
+    sel = MAX192AEPP_CHANNEL_TO_COMMAND[channel]
+    return [base_byte|(sel<<4), 0, 0]
 
 def process_response(response):
     ''' Return the first 10 bits received back from the adc after 10 zeros '''
@@ -34,11 +35,12 @@ class MAX192AEPP(object):
 def test():
     try:
         while True:
-            for channel in range(0, 8):
-                print(channel, MAX192AEPP.read_channel(channel))
-
+            for channel in range(8):
+                print(channel, MAX192AEPP.read_channel(channel), end='\t')
+            print()
     except KeyboardInterrupt:
         spi.close()
 
 if __name__ == '__main__':
     test()
+

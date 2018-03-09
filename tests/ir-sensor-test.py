@@ -21,18 +21,14 @@ def BytesToHex(Bytes):
 
 try:
     while True:
-        #write chip select 0 low
-        #io.output(8, False)
-        #time.sleep(2)
-        #io.output(8, False)
-
-        # spi.writebytes([0x8F])
-        # rb1 = spi.readbytes(1)
-        resp = spi.xfer2([0x8f, 0, 0])
-        print(bin(resp[1]<<5), bin(resp[2]>>3))
-        data = (resp[1]<<5) + (resp[2]>>3)
-        print(bin(resp[0]), bin(resp[1]), bin(resp[2]))
-        print(data)
+        
+        for channel in range(8):
+            print(channel, bin(0x8f|(channel<<4)), end="\t")
+            resp = spi.xfer2([0x8f|(channel<<4), 0, 0])
+            
+            data = (resp[1]<<5) + (resp[2]>>3)
+            print(data)
+        print()
 
         time.sleep(.1) # sleep for 0.25 seconds
 

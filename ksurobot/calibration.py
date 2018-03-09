@@ -9,10 +9,10 @@ def get_reading(channel, filename):
         f.write('Ruler Distance, Sensor measured value\n')
         while True:
             distance = input('Enter the distance to read (q to quit): ')
-            
+
             if distance == 'q':
                 break
-            
+
             try:
                 distance = int(distance)
             except ValueError:
