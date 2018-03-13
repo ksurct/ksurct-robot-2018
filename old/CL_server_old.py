@@ -70,7 +70,7 @@ GPIO.setup(GPIO_FWD_PIN, GPIO.OUT)
 GPIO.setup(GPIO_REV_PIN, GPIO.OUT)
 
 GPIO.setup(16, GPIO.OUT)
-GPIO.output(16, GPIO.HIGH);/
+GPIO.output(16, GPIO.HIGH);
 
 # The following is a set of definitions for terminal text color
 class TextColors:

@@ -5,7 +5,7 @@
 
 from math import isclose
 from collections import namedtuple
-import  sdl2
+import sdl2
 from sdl2 import ext
 
 

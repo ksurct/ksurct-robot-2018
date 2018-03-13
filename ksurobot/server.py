@@ -1,4 +1,4 @@
-''' Server.py
+''' server.py
 
     This is the server to be ran on the pi
 '''
@@ -101,7 +101,7 @@ class Server(object):
 
                 # Send the message
                 await ws.send(pickled_message)
-            await asyncio.sleep(.5)
+            await asyncio.sleep(.1)
 
 
     async def shutdown(self):

@@ -1,4 +1,4 @@
-''' Client.py
+''' client.py
 
     Send controller info to the server
 '''
@@ -11,7 +11,7 @@ from xbox import Controller
 import pickle
 import logging
 
-from Settings import SERVER_IP, SERVER_PORT
+from settings import SERVER_IP, SERVER_PORT
 
 TIMEOUT_DELAY = 5
 DELAY_TIME = 1
@@ -86,7 +86,7 @@ class Client(object):
                 pickled_message = pickle.dumps(controller_data)
 
                 await self.ws.send(pickled_message)
-            await asyncio.sleep(1)
+            await asyncio.sleep(.1)
 
     async def receiver(self):
         ''' Handle data from the server '''
