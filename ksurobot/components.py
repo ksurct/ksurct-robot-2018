@@ -101,7 +101,7 @@ class LEDComponent(OutputComponent):
 
 class MotorComponent(OutputComponent):
 
-    def __init__(pca9685, pca9685_channel, dir_pin, forward_axis, backward_axis, feedback_pin, reverse):
+    def __init__(self, pca9685, pca9685_channel, dir_pin, forward_axis, backward_axis, feedback_pin, reverse):
         ''' Setup PCA9685, feedback pin, and button '''
 
         # Setup PCA9685

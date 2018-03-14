@@ -41,7 +41,7 @@ SERVO_1_SPEED = 300
 
 # Motor settings
 MOTOR_I2C_ADDRESS = 0x40
-MOTOR_PWM_FREQ = 1600
+MOTOR_PWM_FREQ = 100
 
 # Motor 0 settings
 MOTOR_0_CHANNEL = 0
