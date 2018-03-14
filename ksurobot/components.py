@@ -101,19 +101,26 @@ class LEDComponent(OutputComponent):
 
 class MotorComponent(OutputComponent):
 
-    def __init__(pca9685, pca9685_channel, feedback_pin, button_axis, reverse=False):
+    def __init__(pca9685, pca9685_channel, dir_pin, forward_axis, backward_axis, feedback_pin, reverse):
         ''' Setup PCA9685, feedback pin, and button '''
 
         # Setup PCA9685
         self.pca9685 = pca9685
         self.pca9685_channel = pca9685_channel
 
-        # Setup feedback pin
-        io.setup(feedback_pin, io.IN)
-        self.feedback_pin
+        # Setup the pin to output the direction of the motors
+        self.dir_pin = dir_pin
+        io.setup(self.dir_pin, io.OUT)
 
-        # Setup button
-        self.button_axis = button_axis
+        # Setup triggers
+        self.forward_axis = forward_axis
+        self.backward_axis = backward_axis
+        
+        # Setup feedback pin
+        # self.feedback_pin = feedback_pin
+        # io.setup(self.feedback_pin, io.IN)
+
+        # Revseres the output when true
         self.reverse = reverse
 
         self.stop()
@@ -124,7 +131,20 @@ class MotorComponent(OutputComponent):
 
     async def update(self, data_dict):
         ''' Update the state of the motor based on the data_dict '''
-        self.pca9685.set_pwm(self.pca9685_channel, 0, data_dict[self.button_axis])
+        
+        # Get the state of the two triggers
+        fwd = (data_dict[self.forward_axis] + 4096) // 2
+        back = (data_dict[self.backward_axis] + 4096) // 2
+        
+        val = fwd - back
+        dir_ = False
+        if val < 0:
+            dir_ = True
+            val = abs(val)
+        
+        self.pca9685.set_pwm(self.pca9685_channel, 0, val)
+        
+        io.output(self.dir_pin, dir_ ^ self.reverse)
 
 
 class ServoComponent(OutputComponent):

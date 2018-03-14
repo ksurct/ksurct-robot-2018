@@ -40,15 +40,15 @@ SERVO_1_SPEED = 300
 ##############################################################
 
 # Motor settings
-MOTOR_I2C_ADDRESS = 0x41
+MOTOR_I2C_ADDRESS = 0x40
 MOTOR_PWM_FREQ = 1600
 
 # Motor 0 settings
-MOTOR_0_P1 = None
-MOTOR_0_P2 = None
-MOTOR_0_HIGH = None
-MOTOR_0_LOW = None
-MOTOR_0_REVERSE = None
+MOTOR_0_CHANNEL = 0
+MOTOR_0_FORWARD_AXIS = 'r_trigger'
+MOTOR_0_BACKWARD_AXIS = 'l_trigger'
+MOTOR_0_DIR_PIN = 26
+MOTOR_0_REVERSE = False
 
 # Motor 1 settings
 MOTOR_1_P1 = None

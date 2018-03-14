@@ -21,11 +21,11 @@ class Robot(object):
 
         # Connect to servo and motor pca9685 boards
         servo_pca9685 = PCA9685(SERVO_I2C_ADDRESS)
-        # motor_pca9685 = PCA9685(MOTOR_I2C_ADDRESS)
+        motor_pca9685 = PCA9685(MOTOR_I2C_ADDRESS)
 
         # Set pca9685 board frequencies
         servo_pca9685.set_pwm_freq(SERVO_PWM_FREQ)
-        # motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
+        motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
 
         self.output_components = [
             # Servos
@@ -33,6 +33,10 @@ class Robot(object):
                             SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
             ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_ON_BUTTON, SERVO_1_OFF_BUTTON,
                             SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
+            
+            # Motors
+            MotorComponent(motor_pca9685, MOTOR_0_CHANNEL, MOTOR_0_DIR_PIN, MOTOR_0_FORWARD_AXIS,
+                            MOTOR_0_BACKWARD_AXIS, 0, MOTOR_0_REVERSE),
 
             # LED
             LEDComponent(LED_BUTTON, LED_PIN),
