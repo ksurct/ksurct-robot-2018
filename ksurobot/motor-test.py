@@ -9,4 +9,4 @@ try:
         for x in range(2048, 4096):
             pca.set_pwm(0, 0, x)
 except KeyboardInterrupt:
-    pass
+    pca.set_all_pwm(0, 0)
