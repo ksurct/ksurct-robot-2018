@@ -11,9 +11,6 @@ from hardware import MAX192AEPP
 
 class Component(object):
 
-    def __init__(self):
-        raise NotImplementedError()
-
     def stop(self):
         ''' Stop the component '''
         raise NotImplementedError()
@@ -58,7 +55,7 @@ class SensorComponent(InputComponent):
 
 class OutputComponent(Component):
 
-    async def update(self, data):
+    async def update(self, data_dict):
         raise NotImplementedError()
 
 
@@ -99,25 +96,24 @@ class LEDComponent(OutputComponent):
                 self._state = 2
 
 
-class MotorComponent(OutputComponent):
+class MotorComponent(Component):
 
-    def __init__(self, pca9685, pca9685_channel, dir_pin, forward_axis, backward_axis, feedback_pin, reverse):
+    def __init__(self, pca9685=None, channel=None, dir_pin=None, feedback_pin=None, reverse=False):
         ''' Setup PCA9685, feedback pin, and button '''
 
         # Setup PCA9685
         self.pca9685 = pca9685
-        self.pca9685_channel = pca9685_channel
+        self.channel = channel
 
         # Setup the pin to output the direction of the motors
         self.dir_pin = dir_pin
         io.setup(self.dir_pin, io.OUT)
-
-        # Setup triggers
-        self.forward_axis = forward_axis
-        self.backward_axis = backward_axis
         
+        self.min_pwm = min_pwm
+        self.last_value = 0
+
         # Setup feedback pin
-        # self.feedback_pin = feedback_pin
+        self.feedback_pin = feedback_pin
         # io.setup(self.feedback_pin, io.IN)
 
         # Revseres the output when true
@@ -129,37 +125,85 @@ class MotorComponent(OutputComponent):
         ''' Stop motor '''
         self.pca9685.set_pwm(self.pca9685_channel, 0, 0)
 
+    def output(self, value):
+        ''' Update the state of the motor based on the value given
+            Value should be a number be a number that is [-4096, 4095]
+        '''
+        
+        if self.last_value == 0:
+            if abs(value) <= self.min_pwm:
+                return # Don't output again if the value stays at zero
+        else:
+            if abs(value) <= self.min_pwm:
+                value = 0
+        
+        self.last_value = value
+
+        direction = 0
+        if value < 0:
+            direction = 1
+            value = abs(value)
+
+        self.pca9685.set_pwm(self.pca9685_channel, 0, value)
+
+        if value != 0: # Just to save time
+            io.output(self.dir_pin, direction ^ self.reverse)
+
+
+class MotorController(OutputComponent):
+
+    def __init__(self, fwd_axis=None, back_axis=None, steer_axis=None, steer_speed=100, motors=None, reverse=False):
+
+        self.fwd_axis = fwd_axis
+        self.back_axis = back_axis
+        self.steer_axis = steer_axis
+
+        self.steer_speed = steer_speed
+        self.reverse = reverse
+
+        self.motors = motors
+
+        self.stop()
+    
+    def stop(self):
+        ''' Stop the motors '''
+        for motor in self.motors:
+            motor.stop()
+    
     async def update(self, data_dict):
-        ''' Update the state of the motor based on the data_dict '''
-        
-        # Get the state of the two triggers
-        fwd = (data_dict[self.forward_axis] + 4096) // 2
-        back = (data_dict[self.backward_axis] + 4096) // 2
-        
+        ''' Update the state of the 4 motors '''
+
+        fwd, back = data_dict[fwd_axis], data_dict[back_axis]
+        steer = -data_dict[steer_axis] if self.reverse else data_dict[steer_axis]
+
         val = fwd - back
-        dir_ = False
-        if val < 0:
-            dir_ = True
-            val = abs(val)
+        if steer < 0:
+            r_val = val - (steer*self.steer_speed)
+            l_val = val
+        else:
+            r_val = val
+            l_val = val - (steer*self.steer_speed)
         
-        self.pca9685.set_pwm(self.pca9685_channel, 0, val)
-        
-        io.output(self.dir_pin, dir_ ^ self.reverse)
+        self.motors[0].output(r_val)
+        self.motors[1].output(r_val)
+        self.motors[2].output(l_val)
+        self.motors[3].output(l_val)
 
 
 class ServoComponent(OutputComponent):
 
-    def __init__(self, pca9685, pca9685_channel, on_button, off_button, max_pwm, min_pwm, button_speed):
+    def __init__(self, pca9685, channel, up_button, down_button, max_pwm, min_pwm, button_speed):
         ''' Setup PCA9685 and button logic '''
 
         # Setup PCA9685
         self.pca9685 = pca9685
-        self.pca9685_channel = pca9685_channel
+        self.channel = channel
 
         # Setup button
-        self.on_button = on_button
-        self.off_button = off_button
+        self.up_button = up_button
+        self.down_button = down_button
 
+        # Set limits
         self.max_pwm = max_pwm
         self.min_pwm = min_pwm
 
@@ -173,27 +217,17 @@ class ServoComponent(OutputComponent):
         pass
         # self.target = self.current
 
-    # async def async_loop(self):
-    #     ''' Loop to be ran in async loop '''
-    #     while True:
-    #         if self.current < self.target:
-    #             if self.current + self.servo_speed < self.target:
-    #                 self.current += self.servo_speed
-    #                 self.set_pwm(self.current)
-    #             else:
-    #                 self.current = self.target
-
-    #         asyncio.sleep(0)
-
+    def output(self):
+        self.pca9685.set_pwm(self.channel, 0, self.target)
 
     async def update(self, data_dict):
         ''' Update the target of the servo based on the data_dict '''
 
-        if data_dict[self.on_button]:
+        if data_dict[self.up_button]:
             self.target = min(self.target + self.button_speed, self.max_pwm)
 
-        elif data_dict[self.off_button]:
+        elif data_dict[self.down_button]:
             self.target = max(self.target - self.button_speed, self.min_pwm)
 
-        self.pca9685.set_pwm(self.pca9685_channel, 0, self.target)
+        self.output()
 

@@ -27,16 +27,23 @@ class Robot(object):
         servo_pca9685.set_pwm_freq(SERVO_PWM_FREQ)
         motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
 
+        motors = [
+            MotorComponent(pca9685=motor_pca9685, channel=0, dir_pin=6),
+            MotorComponent(pca9685=motor_pca9685, channel=1, dir_pin=13),
+            MotorComponent(pca9685=motor_pca9685, channel=2, dir_pin=16),
+            MotorComponent(pca9685=motor_pca9685, channel=3, dir_pin=26),
+        ]
+
         self.output_components = [
             # Servos
-            ServoComponent(servo_pca9685, SERVO_0_CHANNEL, SERVO_0_ON_BUTTON, SERVO_0_OFF_BUTTON,
+            ServoComponent(servo_pca9685, SERVO_0_CHANNEL, SERVO_0_UP_BUTTON, SERVO_0_DOWN_BUTTON,
                             SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
-            ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_ON_BUTTON, SERVO_1_OFF_BUTTON,
+            ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_UP_BUTTON, SERVO_1_DOWN_BUTTON,
                             SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
             
             # Motors
-            MotorComponent(motor_pca9685, MOTOR_0_CHANNEL, MOTOR_0_DIR_PIN, MOTOR_0_FORWARD_AXIS,
-                            MOTOR_0_BACKWARD_AXIS, 0, MOTOR_0_REVERSE),
+            MotorController(fwd_axis='r_trigger', back_axis='l_trigger', steer_axis='r_stick_x',
+                                    steer_speed=100, motors=motors),
 
             # LED
             LEDComponent(LED_BUTTON, LED_PIN),
