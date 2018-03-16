@@ -98,7 +98,7 @@ class LEDComponent(OutputComponent):
 
 class MotorComponent(Component):
 
-    def __init__(self, pca9685=None, channel=None, dir_pin=None, feedback_pin=None, reverse=False):
+    def __init__(self, pca9685=None, channel=None, min_pwm=0, dir_pin=None, feedback_pin=None, reverse=False):
         ''' Setup PCA9685, feedback pin, and button '''
 
         # Setup PCA9685
@@ -123,7 +123,7 @@ class MotorComponent(Component):
 
     def stop(self):
         ''' Stop motor '''
-        self.pca9685.set_pwm(self.pca9685_channel, 0, 0)
+        self.pca9685.set_pwm(self.channel, 0, 0)
 
     def output(self, value):
         ''' Update the state of the motor based on the value given
@@ -143,8 +143,8 @@ class MotorComponent(Component):
         if value < 0:
             direction = 1
             value = abs(value)
-
-        self.pca9685.set_pwm(self.pca9685_channel, 0, value)
+        if value < 4096:
+            self.pca9685.set_pwm(self.pca9685_channel, 0, value)
 
         if value != 0: # Just to save time
             io.output(self.dir_pin, direction ^ self.reverse)
@@ -173,7 +173,7 @@ class MotorController(OutputComponent):
     async def update(self, data_dict):
         ''' Update the state of the 4 motors '''
 
-        fwd, back = data_dict[fwd_axis], data_dict[back_axis]
+        fwd, back = (data_dict[fwd_axis] + 4096) // 2, (data_dict[back_axis] + 4096) // 2
         steer = -data_dict[steer_axis] if self.reverse else data_dict[steer_axis]
 
         val = fwd - back
