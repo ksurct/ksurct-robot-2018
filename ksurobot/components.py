@@ -9,6 +9,9 @@ import RPi.GPIO as io
 
 from hardware import MAX192AEPP
 
+import logging
+
+
 class Component(object):
 
     def stop(self):
@@ -108,9 +111,8 @@ class MotorComponent(Component):
         # Setup the pin to output the direction of the motors
         self.dir_pin = dir_pin
         io.setup(self.dir_pin, io.OUT)
-        
+
         self.min_pwm = min_pwm
-        self.last_value = 0
 
         # Setup feedback pin
         self.feedback_pin = feedback_pin
@@ -124,19 +126,22 @@ class MotorComponent(Component):
     def stop(self):
         ''' Stop motor '''
         self.pca9685.set_pwm(self.channel, 0, 0)
+        self.last_value = 0
 
     def output(self, value):
         ''' Update the state of the motor based on the value given
             Value should be a number be a number that is [-4096, 4095]
         '''
-        
+
         if self.last_value == 0:
             if abs(value) <= self.min_pwm:
                 return # Don't output again if the value stays at zero
         else:
             if abs(value) <= self.min_pwm:
                 value = 0
-        
+
+        if self.last_value == value:
+            return # Don't output if the value hasn't changed
         self.last_value = value
 
         direction = 0
@@ -144,10 +149,12 @@ class MotorComponent(Component):
             direction = 1
             value = abs(value)
         if value < 4096:
-            self.pca9685.set_pwm(self.pca9685_channel, 0, value)
+            self.pca9685.set_pwm(self.channel, 0, value)
 
-        if value != 0: # Just to save time
-            io.output(self.dir_pin, direction ^ self.reverse)
+        logging.getLogger('__main__').info('Setting: {}, {}'.format(self.channel, value))
+
+        #if not value: # Just to save time
+        io.output(self.dir_pin, direction ^ self.reverse)
 
 
 class MotorController(OutputComponent):
@@ -173,17 +180,19 @@ class MotorController(OutputComponent):
     async def update(self, data_dict):
         ''' Update the state of the 4 motors '''
 
-        fwd, back = (data_dict[fwd_axis] + 4096) // 2, (data_dict[back_axis] + 4096) // 2
-        steer = -data_dict[steer_axis] if self.reverse else data_dict[steer_axis]
+        fwd, back = (data_dict[self.fwd_axis] + 4096) // 2, (data_dict[self.back_axis] + 4096) // 2
+        steer = -data_dict[self.steer_axis] if self.reverse else data_dict[self.steer_axis]
 
         val = fwd - back
         if steer < 0:
-            r_val = val - (steer*self.steer_speed)
+            r_val = val - (abs(steer)*self.steer_speed)
             l_val = val
         else:
             r_val = val
-            l_val = val - (steer*self.steer_speed)
-        
+            l_val = val - (abs(steer)*self.steer_speed)
+
+        logging.getLogger('__main__').info('Controller values: {0}, {1}'.format(r_val, l_val))
+
         self.motors[0].output(r_val)
         self.motors[1].output(r_val)
         self.motors[2].output(l_val)

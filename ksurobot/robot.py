@@ -28,19 +28,19 @@ class Robot(object):
         motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
 
         motors = [
-            MotorComponent(pca9685=motor_pca9685, min_pwm=1000, channel=0, dir_pin=6),
-            MotorComponent(pca9685=motor_pca9685, min_pwm=1000, channel=1, dir_pin=13),
-            MotorComponent(pca9685=motor_pca9685, min_pwm=1000, channel=2, dir_pin=16),
-            MotorComponent(pca9685=motor_pca9685, min_pwm=1000, channel=3, dir_pin=26),
+            MotorComponent(pca9685=motor_pca9685, min_pwm=2000, channel=0, dir_pin=6),
+            MotorComponent(pca9685=motor_pca9685, min_pwm=2000, channel=1, dir_pin=13),
+            MotorComponent(pca9685=motor_pca9685, min_pwm=2000, channel=2, dir_pin=16),
+            MotorComponent(pca9685=motor_pca9685, min_pwm=2000, channel=3, dir_pin=26),
         ]
 
         self.output_components = [
             # Servos
-            ServoComponent(servo_pca9685, SERVO_0_CHANNEL, SERVO_0_UP_BUTTON, SERVO_0_DOWN_BUTTON,
-                            SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
-            ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_UP_BUTTON, SERVO_1_DOWN_BUTTON,
-                            SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
-            
+#            ServoComponent(servo_pca9685, SERVO_0_CHANNEL, SERVO_0_UP_BUTTON, SERVO_0_DOWN_BUTTON,
+#                            SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
+#            ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_UP_BUTTON, SERVO_1_DOWN_BUTTON,
+#                            SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
+
             # Motors
             MotorController(fwd_axis='r_trigger', back_axis='l_trigger', steer_axis='r_stick_x',
                                     steer_speed=100, motors=motors),
