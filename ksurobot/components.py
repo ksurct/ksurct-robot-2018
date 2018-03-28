@@ -188,7 +188,7 @@ class ServoComponent(OutputComponent):
         '''increment self.current according to the step size, then move to new current'''
         STEP_SIZE = 1; #the step size, a higher number means moving faster
 
-        if self.target <= self.max_pwm && self.target >= self.min_pwm: #data should be between max and min
+        if self.target <= self.max_pwm and self.target >= self.min_pwm: #data should be between max and min
             if self.current <= self.target:
                 self.current += STEP_SIZE #increment up by that size
                 if self.current > self.target: #if you've gone too far, set to target
