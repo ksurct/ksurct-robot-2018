@@ -4,10 +4,12 @@
 '''
 
 import asyncio
-
+import logging
 import RPi.GPIO as io
 
 from hardware import MAX192AEPP
+
+logger = logging.getLogger("__main__")
 
 class Component(object):
 
@@ -143,9 +145,9 @@ class ServoComponent(OutputComponent):
         self.max_pwm = max_pwm
         self.min_pwm = min_pwm
 
-        # self.current = min_pwm
+        self.current = min_pwm
         self.target = min_pwm
-        # self.servo_speed = servo_speed
+        # self.servo_speed = servo_speed logging.getLogger 
         self.button_speed = button_speed
 
     def stop(self):
@@ -175,5 +177,29 @@ class ServoComponent(OutputComponent):
         elif data_dict[self.off_button]:
             self.target = max(self.target - self.button_speed, self.min_pwm)
 
-        self.pca9685.set_pwm(self.pca9685_channel, 0, self.target)
+        #self.pca9685.set_pwm(self.pca9685_channel, 0, self.target)
+        #slowely move to where we want to be
+        while self.current != self.target:
+            self.move_to()
+
+    
+    def move_to(self):
+        '''move the servo to self.target, call this function in a loop'''
+        '''increment self.current according to the step size, then move to new current'''
+        STEP_SIZE = 1; #the step size, a higher number means moving faster
+
+        if self.target <= self.max_pwm && self.target >= self.min_pwm: #data should be between max and min
+            if self.current <= self.target:
+                self.current += STEP_SIZE #increment up by that size
+                if self.current > self.target: #if you've gone too far, set to target
+                    self.current = self.target
+            elif self.current >= self.target:
+                self.current -+ STEP_SIZE
+                if self.current < self.target: #if you've gone too far, set to target
+                    self.current = self.target
+            self.pca9685.set_pwm(self.pca9685_channel, 0, self.current) #move the servo CHECK OUT THE 0
+        else:
+            logger.warn("Bad target for servo")
+           
+
 
