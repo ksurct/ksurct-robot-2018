@@ -102,7 +102,15 @@ class LEDComponent(OutputComponent):
 class MotorComponent(Component):
 
     def __init__(self, pca9685=None, channel=None, min_pwm=0, dir_pin=None, feedback_pin=None, reverse=False):
-        ''' Setup PCA9685, feedback pin, and button '''
+        ''' Setup PCA9685, and other settings
+        
+            - pca9685: an object to output the pwm
+            - channel: the channel to output to using the pca9685
+            - min_pwm: the minimum value that we can output to the motor
+            - dir_pin: the GPIO pin that will output the direction to the motor controller
+            - feedback_pin: (NOT USED) the pin that provides feedback about the motors speed
+            - reverse: reverses the direction output if true
+        '''
 
         # Setup PCA9685
         self.pca9685 = pca9685
@@ -160,7 +168,11 @@ class MotorComponent(Component):
 class MotorController(OutputComponent):
 
     def __init__(self, fwd_axis=None, back_axis=None, steer_axis=None, steer_speed=100, motors=None, reverse=False):
+        ''' Setup controls and individual motors
 
+            - 
+            - reverse: reverses the direction output if true
+        '''
         self.fwd_axis = fwd_axis
         self.back_axis = back_axis
         self.steer_axis = steer_axis
