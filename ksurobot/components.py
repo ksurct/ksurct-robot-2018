@@ -186,15 +186,18 @@ class ServoComponent(OutputComponent):
     def move_to(self):
         '''move the servo to self.target, call this function in a loop'''
         '''increment self.current according to the step size, then move to new current'''
-        STEP_SIZE = 1; #the step size, a higher number means moving faster
+        #PWM_STEP_SIZE = 1; #the step size, a higher number means moving faster
+        #this has been added to settings.py, uncomment for testing probably
 
-        if self.target <= self.max_pwm && self.target >= self.min_pwm: #data should be between max and min
+        goodDataFlag = (self.target <= self.max_pwm) && (self.target >= self.min_pwm) #if data is in valid range
+
+        if(goodDataFlag): #if you have good data
             if self.current <= self.target:
-                self.current += STEP_SIZE #increment up by that size
+                self.current += PWM_STEP_SIZE #increment up by that size
                 if self.current > self.target: #if you've gone too far, set to target
                     self.current = self.target
-            elif self.current >= self.target:
-                self.current -+ STEP_SIZE
+            elif self.current >= self.target: 
+                self.current -+ PWM_STEP_SIZE
                 if self.current < self.target: #if you've gone too far, set to target
                     self.current = self.target
             self.pca9685.set_pwm(self.pca9685_channel, 0, self.current) #move the servo CHECK OUT THE 0

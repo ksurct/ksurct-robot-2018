@@ -20,6 +20,7 @@ SERVER_PORT = 8055
 # Servo settings
 SERVO_I2C_ADDRESS = 0x40
 SERVO_PWM_FREQ = 60
+PWM_STEP_SIZE = 1
 
 # Servo 0 settings
 SERVO_0_CHANNEL = 0
