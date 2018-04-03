@@ -183,21 +183,24 @@ class MotorComponent(Component):
         (float)time_delta = time.time() - self._last_time
         (float)current_speed = pid_calc_speed(self, time_delta)
         (float)err = desired_speed - current_speed # this is our error term
-        '''need desired speed'''
+        '''need desired speed, get rough estimates of max and min speed for desired speed, have it scale linearlly with analog input'''
 
         # Integral term
         (float)integral += err * time_delta # old school integral
+        # MAY NEED A LIMIT, SO IT DOESNT FREAK OUT
 
         # Derivative term
         (float)derivative = (err - self._prev_err) / time_delta # change in error over change in time
 
         delta_output_speed = self.kp * err + self.ki * integral + self.kd * derivative
+        # left_motor_speed = desired_speed + delta
         # delta_ouput_speed is change in output_speed
         # sum the two and output it
 
         self._prev_err = err
         self._last_time = time.time()
 
+        #set limit on output to valid pwm 
         return delta_output_speed
 
 
