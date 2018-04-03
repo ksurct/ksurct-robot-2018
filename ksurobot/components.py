@@ -9,6 +9,8 @@ import RPi.GPIO as io
 
 from hardware import MAX192AEPP
 
+import time
+
 logger = logging.getLogger("__main__")
 
 class Component(object):
@@ -131,78 +133,93 @@ class MotorComponent(OutputComponent):
 
 class ServoComponent(OutputComponent):
 
-    def __init__(self, pca9685, pca9685_channel, on_button, off_button, max_pwm, min_pwm, button_speed):
-        ''' Setup PCA9685 and button logic '''
+    def __init__(self, pca9685, pca9685_channel, manual_axis, max_pwm, min_pwm, presets, servo_speed):
+        ''' Setup PCA9685 and button logic
 
-        # Setup PCA9685
+            - pca9685: an object to output the pwm
+            - pca9685_channel: the channel to output to using the pca9685
+            - manual_axis: the axis that will control the fine-tuning movements
+            - max_pwm: the maximum value that we can output to the servo
+            - min_pwm: the minimum value that we can output to the servo
+            - presets: A list that consits of tuples in the form (button_name, preset_value)
+                    with the highest priorty at the front
+            - servo_speed: the speed that the servo moves at
+         '''
+
+        # Setup PCA9685 connection
         self.pca9685 = pca9685
-        self.pca9685_channel = pca9685_channel
+        self.pca9685_channel = int(pca9685_channel)
 
-        # Setup button
-        self.on_button = on_button
-        self.off_button = off_button
+        self.manual_axis = manual_axis
 
-        self.max_pwm = max_pwm
-        self.min_pwm = min_pwm
+        self.max_pwm = int(max_pwm)
+        self.min_pwm = int(min_pwm)
 
-        self.current = min_pwm
-        self.target = min_pwm
-        # self.servo_speed = servo_speed logging.getLogger 
-        self.button_speed = button_speed
+        # Check presets for errors
+        for p in presets:
+            if p[1] > self.max_pwm or p[1] self.min_pwm:
+                logger.warn("A preset value is out of range!!!!")
+        self.presets = presets
+
+        self.current = 0
+        self.target = self.min_pwm
+        self._last_time = time.time()
+        self._last_ouput = self.current
+        
+        self.servo_speed = servo_speed
+
+        self.setup()
 
     def stop(self):
         ''' Stop Servo '''
-        pass
-        # self.target = self.current
+        self.target = self.current
 
-    # async def async_loop(self):
-    #     ''' Loop to be ran in async loop '''
-    #     while True:
-    #         if self.current < self.target:
-    #             if self.current + self.servo_speed < self.target:
-    #                 self.current += self.servo_speed
-    #                 self.set_pwm(self.current)
-    #             else:
-    #                 self.current = self.target
-
-    #         asyncio.sleep(0)
-
+    def setup(self):
+        ''' Move the servo until it reaches it's starting position '''
+        while self.current != self.target:
+            self.move_towards()
+            asyncio.sleep(0.01)
 
     async def update(self, data_dict):
         ''' Update the target of the servo based on the data_dict '''
 
-        if data_dict[self.on_button]:
-            self.target = min(self.target + self.button_speed, self.max_pwm)
+        # Check data_dict for manual control
+        if data_dict[self.manual_axis] > 0:
+            self.target = min(self.target + self.servo_speed, self.max_pwm)
+        elif data_dict[self.manual_axis] < 0:
+            self.target = max(self.target - self.servo_speed, self.min_pwm)
 
-        elif data_dict[self.off_button]:
-            self.target = max(self.target - self.button_speed, self.min_pwm)
+        # Set to a preset value and override manual control
+        for preset in self.presets:
+            if data_dict[preset[0]]:
+                self.target = int(preset[1])
+                break
 
-        #self.pca9685.set_pwm(self.pca9685_channel, 0, self.target)
-        #slowely move to where we want to be
-        while self.current != self.target:
-            self.move_to()
+        # Slowely move to where we want to be
+        if self.current != self.target:
+            self.move_towards()
 
     
-    def move_to(self):
-        '''move the servo to self.target, call this function in a loop'''
-        '''increment self.current according to the step size, then move to new current'''
-        #PWM_STEP_SIZE = 1; #the step size, a higher number means moving faster
-        #this has been added to settings.py, uncomment for testing probably
+    def move_towards(self):
+        ''' Move the servo to self.target,
+            increment self.current according to the servo speed and time elapsed,
+            then move to new current and save the state
+        '''
+        # Calculate the amount to move by
+        time_delta = time.time() - self._last_time
+        move_amt = int(self.servo_speed * time_delta)
+        if move_amt < 1: move_amt = 1
 
-        goodDataFlag = (self.target <= self.max_pwm) && (self.target >= self.min_pwm) #if data is in valid range
-
-        if(goodDataFlag): #if you have good data
-            if self.current <= self.target:
-                self.current += PWM_STEP_SIZE #increment up by that size
-                if self.current > self.target: #if you've gone too far, set to target
-                    self.current = self.target
-            elif self.current >= self.target: 
-                self.current -+ PWM_STEP_SIZE
-                if self.current < self.target: #if you've gone too far, set to target
-                    self.current = self.target
-            self.pca9685.set_pwm(self.pca9685_channel, 0, self.current) #move the servo CHECK OUT THE 0
-        else:
-            logger.warn("Bad target for servo")
-           
-
-
+        # Increment towards the target value in the right direction without being out of bounds
+        if self.current < self.target:
+            self.current = min(self.current + move_amt, self.target, self.max_pwm)
+        elif self.current >= self.target:
+            self.current = max(self.current - move_amt, self.target, self.min_pwm)
+        
+        # Output if change is needed
+        if self.current != self._last_ouput:
+            self.pca9685.set_pwm(self.pca9685_channel, 0, self.current) # Move the servo CHECK OUT THE 0
+        
+        # Save state for future
+        self._last_time = time.time()
+        self._last_ouput = self.current
