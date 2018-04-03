@@ -28,10 +28,10 @@ class Robot(object):
         motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
 
         motors = [
-            MotorComponent(pca9685=motor_pca9685, min_pwm=2000, channel=0, dir_pin=6),
-            MotorComponent(pca9685=motor_pca9685, min_pwm=2000, channel=1, dir_pin=13),
-            MotorComponent(pca9685=motor_pca9685, min_pwm=2000, channel=2, dir_pin=16),
-            MotorComponent(pca9685=motor_pca9685, min_pwm=2000, channel=3, dir_pin=26),
+            MotorComponent(pca9685=motor_pca9685, channel=0, dir_pin=6),
+            MotorComponent(pca9685=motor_pca9685, channel=1, dir_pin=13),
+            MotorComponent(pca9685=motor_pca9685, channel=2, dir_pin=16),
+            MotorComponent(pca9685=motor_pca9685, channel=3, dir_pin=26),
         ]
 
         self.output_components = [
@@ -43,7 +43,7 @@ class Robot(object):
 
             # Motors
             MotorController(fwd_axis='r_trigger', back_axis='l_trigger', steer_axis='r_stick_x',
-                                    steer_speed=100, motors=motors),
+                                    steer_speed=100, motors=motors, min_pwm=2000),
 
             # LED
             LEDComponent(LED_BUTTON, LED_PIN),

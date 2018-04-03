@@ -105,7 +105,7 @@ class LEDComponent(OutputComponent):
 
 class MotorComponent(Component):
 
-    def __init__(self, pca9685=None, channel=None, min_pwm=0, dir_pin=None, feedback_pin=None, reverse=False, kp = 0, ki = 0, kd = 0):
+    def __init__(self, pca9685=None, channel=None, dir_pin=None, feedback_pin=None, reverse=False, kp = 0, ki = 0, kd = 0):
         ''' Setup PCA9685, and other settings
         
             - pca9685: an object to output the pwm
@@ -124,7 +124,7 @@ class MotorComponent(Component):
         self.dir_pin = dir_pin
         io.setup(self.dir_pin, io.OUT)
 
-        self.min_pwm = min_pwm
+        self.min_pwm = 0
 
         # Setup feedback pin
         self.feedback_pin = feedback_pin
@@ -221,7 +221,7 @@ class MotorComponent(Component):
 
 class MotorController(OutputComponent):
 
-    def __init__(self, fwd_axis=None, back_axis=None, steer_axis=None, steer_speed=100, motors=None, reverse=False):
+    def __init__(self, fwd_axis=None, back_axis=None, steer_axis=None, steer_speed=100, motors=None, min_pwm=0, reverse=False):
         ''' Setup controls and individual motors
 
             - fwd_axis: a button axis with a range of -4096 to 4095
@@ -239,6 +239,9 @@ class MotorController(OutputComponent):
         self.reverse = reverse
 
         self.motors = motors
+        self.min_pwm = min_pwm
+        for motor in self.motors:
+            motor.min_pwm = self.min_pwm
 
         self.stop()
     
@@ -252,7 +255,7 @@ class MotorController(OutputComponent):
 
         fwd, back = (data_dict[self.fwd_axis] + 4096) // 2, (data_dict[self.back_axis] + 4096) // 2
         steer = -data_dict[self.steer_axis] if self.reverse else data_dict[self.steer_axis]
-
+        
         val = fwd - back
         if steer < 0:
             r_val = val - (abs(steer)*self.steer_speed)
@@ -261,7 +264,17 @@ class MotorController(OutputComponent):
             r_val = val
             l_val = val - (abs(steer)*self.steer_speed)
 
-        logging.getLogger('__main__').info('Controller values: {0}, {1}'.format(r_val, l_val))
+        # Map values to a range between min_pwm and 4095
+        # but keep at 0 if already at zero
+        slope = self.min_pwm / 4095
+        
+        if r_val > 0: r_val = int(slope * r_val) + self.min_pwm
+        if r_val < 0: r_val = int(slope * r_val) - self.min_pwm
+        
+        if l_val > 0: l_val = int(slope * l_val) + self.min_pwm
+        if l_val < 0: l_val = int(slope * l_val) - self.min_pwm
+
+        # logging.getLogger('__main__').info('Controller values: {0}, {1}'.format(r_val, l_val))
 
         self.motors[0].output(r_val) # Front Right
         self.motors[1].output(r_val) # Back Right
