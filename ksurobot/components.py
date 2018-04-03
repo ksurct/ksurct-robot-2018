@@ -65,7 +65,11 @@ class OutputComponent(Component):
 class LEDComponent(OutputComponent):
 
     def __init__(self, button, pin):
-        ''' Setup a button to control a pin to control an LED '''
+        ''' Setup a button to control a pin to control an LED
+        
+            - button: the controller button that will toggle the LED
+            - pin: the GPIO pin that the LED in controlled from
+        '''
 
         self.button = button
         self.pin = pin
@@ -159,7 +163,7 @@ class MotorComponent(Component):
         if value < 4096:
             self.pca9685.set_pwm(self.channel, 0, value)
 
-        logging.getLogger('__main__').info('Setting: {}, {}'.format(self.channel, value))
+        logging.getLogger('__main__').info('Setting: {}, {}'.(self.channel, value))
 
         #if not value: # Just to save time
         io.output(self.dir_pin, direction ^ self.reverse)
@@ -170,7 +174,11 @@ class MotorController(OutputComponent):
     def __init__(self, fwd_axis=None, back_axis=None, steer_axis=None, steer_speed=100, motors=None, reverse=False):
         ''' Setup controls and individual motors
 
-            - 
+            - fwd_axis: a button axis with a range of -4096 to 4095
+            - back_axis: a button axis with a range of -4096 to 4095
+            - steer_axis: a button axis with a range of -10 to 10
+            - steer_speed: the speed multipler for steering
+            - motors: a list of motor components, in order: FR, BR, BL, FL
             - reverse: reverses the direction output if true
         '''
         self.fwd_axis = fwd_axis
@@ -205,10 +213,10 @@ class MotorController(OutputComponent):
 
         logging.getLogger('__main__').info('Controller values: {0}, {1}'.format(r_val, l_val))
 
-        self.motors[0].output(r_val)
-        self.motors[1].output(r_val)
-        self.motors[2].output(l_val)
-        self.motors[3].output(l_val)
+        self.motors[0].output(r_val) # Front Right
+        self.motors[1].output(r_val) # Back Right
+        self.motors[2].output(l_val) # Back Left
+        self.motors[3].output(l_val) # Front Left
 
 
 class ServoComponent(OutputComponent):
