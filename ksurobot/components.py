@@ -105,7 +105,7 @@ class LEDComponent(OutputComponent):
 
 class MotorComponent(Component):
 
-    def __init__(self, pca9685=None, channel=None, min_pwm=0, dir_pin=None, feedback_pin=None, reverse=False):
+    def __init__(self, pca9685=None, channel=None, min_pwm=0, dir_pin=None, feedback_pin=None, reverse=False, kp = 0, ki = 0, kd = 0):
         ''' Setup PCA9685, and other settings
         
             - pca9685: an object to output the pwm
@@ -130,8 +130,17 @@ class MotorComponent(Component):
         self.feedback_pin = feedback_pin
         # io.setup(self.feedback_pin, io.IN)
 
-        # Revseres the output when true
+        # Reverses the output when true
         self.reverse = reverse
+
+        # Constants for PID loop
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+
+        # Last time for PID loop
+        (float)self._last_time = time.time()
+        (float)self._prev_err = 0
 
         self.stop()
 
@@ -161,12 +170,50 @@ class MotorComponent(Component):
             direction = 1
             value = abs(value)
         if value < 4096:
-            self.pca9685.set_pwm(self.channel, 0, value)
+            self.pca9685.set_pwm(self.channel, 0, value + pid_calculate(self)) 
 
         logging.getLogger('__main__').info('Setting: {}, {}'.(self.channel, value))
 
-        #if not value: # Just to save time
+        # if not value: # Just to save time
         io.output(self.dir_pin, direction ^ self.reverse)
+
+    def pid_calculate(self):
+        ''' calculates the error term
+        '''
+        (float)time_delta = time.time() - self._last_time
+        (float)current_speed = pid_calc_speed(self, time_delta)
+        (float)err = desired_speed - current_speed # this is our error term
+        '''need desired speed'''
+
+        # Integral term
+        (float)integral += err * time_delta # old school integral
+
+        # Derivative term
+        (float)derivative = (err - self._prev_err) / time_delta # change in error over change in time
+
+        delta_output_speed = self.kp * err + self.ki * integral + self.kd * derivative
+        # delta_ouput_speed is change in output_speed
+        # sum the two and output it
+
+        self._prev_err = err
+        self._last_time = time.time()
+
+        return delta_output_speed
+
+
+    def pid_calc_speed(self):
+        ''' calculates the current speed using interrupt data 
+        '''
+        current_speed = ((MOTOR_TICKS_PER_ROTATE) * NUM_TICKS) / time_delta
+        #clear ticks
+        raise NotImplementedError
+        return current_speed
+        '''
+        current speed in (m/s) = ((m/ticks) * ticks) / time
+        finish this when I know how we get ticks
+        '''
+
+
 
 
 class MotorController(OutputComponent):
