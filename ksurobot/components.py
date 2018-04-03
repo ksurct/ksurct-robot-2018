@@ -183,11 +183,17 @@ class ServoComponent(OutputComponent):
     async def update(self, data_dict):
         ''' Update the target of the servo based on the data_dict '''
 
+        # Validate that data is in the set range
+        if self.target > self.max_pwm or self.target < self.min_pwm:
+            logger.warn('Target servo pwm out of range')
+            self.stop()
+            return
+
         # Check data_dict for manual control
         if data_dict[self.manual_axis] > 0:
-            self.target = min(self.target + self.servo_speed, self.max_pwm)
+            self.target = self.target + self.servo_speed
         elif data_dict[self.manual_axis] < 0:
-            self.target = max(self.target - self.servo_speed, self.min_pwm)
+            self.target = self.target - self.servo_speed
 
         # Set to a preset value and override manual control
         for preset in self.presets:
