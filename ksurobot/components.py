@@ -139,8 +139,8 @@ class MotorComponent(Component):
         self.kd = kd
 
         # Last time for PID loop
-        (float)self._last_time = time.time()
-        (float)self._prev_err = 0
+        self._last_time = time.time()
+        self._prev_err = 0.0
 
         self.stop()
 
@@ -180,17 +180,17 @@ class MotorComponent(Component):
     def pid_calculate(self):
         ''' calculates the error term
         '''
-        (float)time_delta = time.time() - self._last_time
-        (float)current_speed = pid_calc_speed(self, time_delta)
-        (float)err = desired_speed - current_speed # this is our error term
+        time_delta = time.time() - self._last_time
+        current_speed = pid_calc_speed(time_delta)
+        err = desired_speed - current_speed # this is our error term
         '''need desired speed, get rough estimates of max and min speed for desired speed, have it scale linearlly with analog input'''
 
         # Integral term
-        (float)integral += err * time_delta # old school integral
+        integral += err * time_delta # old school integral
         # MAY NEED A LIMIT, SO IT DOESNT FREAK OUT
 
         # Derivative term
-        (float)derivative = (err - self._prev_err) / time_delta # change in error over change in time
+        derivative = (err - self._prev_err) / time_delta # change in error over change in time
 
         delta_output_speed = self.kp * err + self.ki * integral + self.kd * derivative
         # left_motor_speed = desired_speed + delta
@@ -203,8 +203,7 @@ class MotorComponent(Component):
         #set limit on output to valid pwm 
         return delta_output_speed
 
-
-    def pid_calc_speed(self):
+    def pid_calc_speed(self, time_delta):
         ''' calculates the current speed using interrupt data 
         '''
         current_speed = ((MOTOR_TICKS_PER_ROTATE) * NUM_TICKS) / time_delta
@@ -215,8 +214,6 @@ class MotorComponent(Component):
         current speed in (m/s) = ((m/ticks) * ticks) / time
         finish this when I know how we get ticks
         '''
-
-
 
 
 class MotorController(OutputComponent):
