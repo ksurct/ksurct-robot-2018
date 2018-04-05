@@ -41,7 +41,7 @@ SERVO_1_SPEED = 300
 
 # Motor settings
 MOTOR_I2C_ADDRESS = 0x40
-MOTOR_PWM_FREQ = 100
+MOTOR_PWM_FREQ = 1000
 MOTOR_TICKS_PER_ROTATE = 0 # this is not right, update after experiment
 
 # Motor 0 settings
