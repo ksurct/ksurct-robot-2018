@@ -157,7 +157,7 @@ class ServoComponent(OutputComponent):
 
         # Check presets for errors
         for p in presets:
-            if p[1] > self.max_pwm or p[1] self.min_pwm:
+            if p[1] > self.max_pwm or p[1] < self.min_pwm:
                 logger.warn("A preset value is out of range!!!!")
         self.presets = presets
 
