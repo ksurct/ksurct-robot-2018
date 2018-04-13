@@ -33,6 +33,8 @@ class Robot(object):
                             SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
             ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_ON_BUTTON, SERVO_1_OFF_BUTTON,
                             SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
+            ServoComponent(servo_pca9685, SERVO_2_CHANNEL, SERVO_2_ON_BUTTON, SERVO_2_OFF_BUTTON,
+                            SERVO_2_MAX_PWM, SERVO_2_MIN_PWM, SERVO_2_SPEED)
 
             # LED
             LEDComponent(LED_BUTTON, LED_PIN),

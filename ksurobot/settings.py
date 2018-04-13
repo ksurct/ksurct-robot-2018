@@ -38,6 +38,16 @@ SERVO_1_MAX_PWM = 3000
 SERVO_1_MIN_PWM = 1000
 SERVO_1_SPEED = 300
 
+# Servo 2 settings (brotosaurus neck)
+SERVO_2_CHANNEL = -1
+SERVO_2_ON_BUTTON = 'test'
+SERVO_2_OFF_BUTTON = 'test'
+SERVO_2_MAX_PWM = 0
+SERVO_2_MIN_PWM = 0
+SERVO_2_SPEED = 0
+#################### UPDATE THESE CONSTANTS #################
+
+
 ##############################################################
 
 # Motor settings
