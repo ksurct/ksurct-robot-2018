@@ -28,10 +28,10 @@ class Robot(object):
         motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
 
         motors = [
-            MotorComponent(pca9685=motor_pca9685, channel=0, dir_pin=6),
-            MotorComponent(pca9685=motor_pca9685, channel=1, dir_pin=13),
-            MotorComponent(pca9685=motor_pca9685, channel=2, dir_pin=16),
-            MotorComponent(pca9685=motor_pca9685, channel=3, dir_pin=26),
+            MotorComponent(pca9685=motor_pca9685, channel=0, dir_pin=40),
+            MotorComponent(pca9685=motor_pca9685, channel=1, dir_pin=38),
+            MotorComponent(pca9685=motor_pca9685, channel=2, dir_pin=32),
+            MotorComponent(pca9685=motor_pca9685, channel=3, dir_pin=28),
         ]
 
         self.output_components = [
