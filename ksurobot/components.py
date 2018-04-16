@@ -105,7 +105,7 @@ class LEDComponent(OutputComponent):
 
 class MotorComponent(Component):
 
-    def __init__(self, pca9685=None, channel=None, dir_pin=None, feedback_pin=None, reverse=False, kp = 0, ki = 0, kd = 0):
+    def __init__(self, pca9685=None, channel=None, dir_pin=None, fb_pin_0=None, fb_pin_1=None, reverse=False, kp = 0, ki = 0, kd = 0):
         ''' Setup PCA9685, and other settings
         
             - pca9685: an object to output the pwm
@@ -126,9 +126,11 @@ class MotorComponent(Component):
 
         self.min_pwm = 0
 
-        # Setup feedback pin
-        self.feedback_pin = feedback_pin
-        # io.setup(self.feedback_pin, io.IN)
+        # Setup feedback
+        self.fb_pin_0 = fb_pin_0
+        self.fb_pin_1 = fb_pin_1
+        self.setup_feedback()
+        self.counter = 0
 
         # Reverses the output when true
         self.reverse = reverse
@@ -143,6 +145,15 @@ class MotorComponent(Component):
         self._prev_err = 0.0
 
         self.stop()
+
+    def incr_fb_counter(self, pin):
+        self.counter += 1
+
+    def setup_feedback(self):
+        ''' Setup the feedback pins and '''
+        io.setup([self.fb_pin_0, self.fb_pin_1], io.IN)
+        io.add_event_detect(self.fb_pin_0, io.both, self.incr_fb_counter)
+        io.add_event_detect(self.fb_pin_1, io.both, self.incr_fb_counter)
 
     def stop(self):
         ''' Stop motor '''
@@ -170,7 +181,7 @@ class MotorComponent(Component):
             direction = 1
             value = abs(value)
         if value < 4096:
-            self.pca9685.set_pwm(self.channel, 0, value + pid_calculate(self)) 
+            self.pca9685.set_pwm(self.channel, value, 0)
 
         logging.getLogger('__main__').info('Setting: {}, {}'.format(self.channel, value))
 
