@@ -21,27 +21,27 @@ SERVER_PORT = 8055
 SERVO_I2C_ADDRESS = 0x40 # Needs to be set
 SERVO_PWM_FREQ = 60
 
-# Servo 0 settings (Front wrist)
+# Servo 0 settings (Brontosaurus neck)
 SERVO_0_CHANNEL = 0
-SERVO_0_MODIFIER = None
+SERVO_0_MODIFIER = 'l_bump'
 SERVO_0_MAX_PWM = 4096
 SERVO_0_MIN_PWM = 0
-SERVO_0_PRESETS = [('y', 4096), ('x', 2048), ('a', 0)]
+SERVO_0_PRESETS = [('y', 4096), ('a', 0)]
 SERVO_0_CONTROL_SPEED = 1;
 SERVO_0_SPEED = 300
 
-# Servo 1 settings (Claw)
+# Servo 1 settings (Front Wrist)
 SERVO_1_CHANNEL = 1
-SERVO_1_MODIFIER = 'r_bump'
+SERVO_1_MODIFIER = None
 SERVO_1_MAX_PWM = 4096
 SERVO_1_MIN_PWM = 0
-SERVO_1_PRESETS = [('y', 4096), ('a', 0)]
+SERVO_1_PRESETS = [('y', 4096), ('x', 2048), ('a', 0)]
 SERVO_1_CONTROL_SPEED = 1;
 SERVO_1_SPEED = 300
 
-# Servo 2 settings (brotosaurus neck)
-SERVO_2_CHANNEL = 2
-SERVO_2_MODIFIER = 'l_bump'
+# Servo 2 settings (Claw)
+SERVO_2_CHANNEL = 3 # 3 isn't a typo, Isaiah wired it dumbly
+SERVO_2_MODIFIER = 'r_bump'
 SERVO_2_MAX_PWM = 4096
 SERVO_2_MIN_PWM = 0
 SERVO_2_PRESETS = [('y', 4096), ('a', 0)]
