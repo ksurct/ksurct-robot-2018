@@ -44,7 +44,7 @@ class SensorComponent(InputComponent):
         index = 0
         distance = 0
         while index < len(coeficients):
-            distance += coefficients[index]*(voltage**(len(coefficients)-index))
+            distance += coefficients[index]*(voltage**(len(coefficients)-index-1))
             index += 1
         return distance
 
