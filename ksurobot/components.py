@@ -6,17 +6,14 @@
 import asyncio
 import logging
 import RPi.GPIO as io
+import time
 
 from hardware import MAX192AEPP
 
-import time
-
 logger = logging.getLogger("__main__")
 
-class Component(object):
 
-    def __init__(self):
-        raise NotImplementedError()
+class Component(object):
 
     def stop(self):
         ''' Stop the component '''
@@ -62,14 +59,18 @@ class SensorComponent(InputComponent):
 
 class OutputComponent(Component):
 
-    async def update(self, data):
+    async def update(self, data_dict):
         raise NotImplementedError()
 
 
 class LEDComponent(OutputComponent):
 
     def __init__(self, button, pin):
-        ''' Setup a button to control a pin to control an LED '''
+        ''' Setup a button to control a pin to control an LED
+        
+            - button: the controller button that will toggle the LED
+            - pin: the GPIO pin that the LED in controlled from
+        '''
 
         self.button = button
         self.pin = pin
@@ -103,39 +104,136 @@ class LEDComponent(OutputComponent):
                 self._state = 2
 
 
-class MotorComponent(OutputComponent):
+class MotorComponent(Component):
 
-    def __init__(pca9685, pca9685_channel, feedback_pin, button_axis, reverse=False):
-        ''' Setup PCA9685, feedback pin, and button '''
+    def __init__(self, pca9685=None, channel=None, dir_pin=None, reverse=False):
+        ''' Setup PCA9685, and other settings
+        
+            - pca9685: an object to output the pwm
+            - channel: the channel to output to using the pca9685
+            - min_pwm: the minimum value that we can output to the motor
+            - dir_pin: the GPIO pin that will output the direction to the motor controller
+            - feedback_pin: (NOT USED) the pin that provides feedback about the motors speed
+            - reverse: reverses the direction output if true
+        '''
 
         # Setup PCA9685
         self.pca9685 = pca9685
-        self.pca9685_channel = pca9685_channel
+        self.channel = channel
 
-        # Setup feedback pin
-        io.setup(feedback_pin, io.IN)
-        self.feedback_pin
+        # Setup the pin to output the direction of the motors
+        self.dir_pin = dir_pin
+        io.setup(self.dir_pin, io.OUT)
 
-        # Setup button
-        self.button_axis = button_axis
+        self.min_pwm = 0
+
+        # Reverses the output when true
         self.reverse = reverse
 
         self.stop()
 
     def stop(self):
         ''' Stop motor '''
-        self.pca9685.set_pwm(self.pca9685_channel, 0, 0)
+        self.pca9685.set_pwm(self.channel, 0, 0)
+        self.last_value = 0
 
+    def output(self, value):
+        ''' Update the state of the motor based on the value given
+            Value should be a number be a number that is [-4096, 4095]
+        '''
+
+        if self.last_value == 0:
+            if abs(value) <= self.min_pwm:
+                return # Don't output again if the value stays at zero
+        else:
+            if abs(value) <= self.min_pwm:
+                value = 0
+
+        if self.last_value == value:
+            return # Don't output if the value hasn't changed
+        self.last_value = value
+
+        direction = 0
+        if value < 0:
+            direction = 1
+            value = abs(value)
+        if value < 4096:
+            self.pca9685.set_pwm(self.channel, 0, value)
+
+        logging.getLogger('__main__').info('Setting: {}, {}'.format(self.channel, value))
+
+        # if not value: # Just to save time
+        io.output(self.dir_pin, direction ^ self.reverse)
+
+
+class MotorController(OutputComponent):
+
+    def __init__(self, fwd_axis=None, back_axis=None, steer_axis=None, steer_speed=100, motors=None, min_pwm=0, reverse=False):
+        ''' Setup controls and individual motors
+
+            - fwd_axis: a button axis with a range of -4096 to 4095
+            - back_axis: a button axis with a range of -4096 to 4095
+            - steer_axis: a button axis with a range of -10 to 10
+            - steer_speed: the speed multipler for steering
+            - motors: a list of motor components, in order: FR, BR, BL, FL
+            - reverse: reverses the direction output if true
+        '''
+        self.fwd_axis = fwd_axis
+        self.back_axis = back_axis
+        self.steer_axis = steer_axis
+
+        self.steer_speed = steer_speed
+        self.reverse = reverse
+
+        self.motors = motors
+        self.min_pwm = min_pwm
+        for motor in self.motors:
+            motor.min_pwm = self.min_pwm
+
+        self.stop()
+    
+    def stop(self):
+        ''' Stop the motors '''
+        for motor in self.motors:
+            motor.stop()
+    
     async def update(self, data_dict):
-        ''' Update the state of the motor based on the data_dict '''
-        self.pca9685.set_pwm(self.pca9685_channel, 0, data_dict[self.button_axis])
+        ''' Update the state of the 4 motors '''
+
+        fwd, back = (data_dict[self.fwd_axis] + 4096) // 2, (data_dict[self.back_axis] + 4096) // 2
+        steer = -data_dict[self.steer_axis] if self.reverse else data_dict[self.steer_axis]
+        
+        val = fwd - back
+        if steer < 0:
+            r_val = val - (abs(steer)*self.steer_speed)
+            l_val = val
+        else:
+            r_val = val
+            l_val = val - (abs(steer)*self.steer_speed)
+
+        # Map values to a range between min_pwm and 4095
+        # but keep at 0 if already at zero
+        slope = self.min_pwm / 4095
+        
+        if r_val > 0: r_val = int(slope * r_val) + self.min_pwm
+        if r_val < 0: r_val = int(slope * r_val) - self.min_pwm
+        
+        if l_val > 0: l_val = int(slope * l_val) + self.min_pwm
+        if l_val < 0: l_val = int(slope * l_val) - self.min_pwm
+
+        # logging.getLogger('__main__').info('Controller values: {0}, {1}'.format(r_val, l_val))
+
+        self.motors[0].output(r_val) # Front Right
+        self.motors[1].output(r_val) # Back Right
+        self.motors[2].output(l_val) # Back Left
+        self.motors[3].output(l_val) # Front Left
 
 
 class ServoComponent(OutputComponent):
 
-    def __init__(self, pca9685, pca9685_channel, manual_axis, max_pwm, min_pwm, presets, servo_speed):
-        ''' Setup PCA9685 and button logic
 
+    def __init__(self, pca9685, pca9685_channel, manual_axis, max_pwm, min_pwm, presets, servo_speed):
+        ''' Setup PCA9685 and button logic   
             - pca9685: an object to output the pwm
             - pca9685_channel: the channel to output to using the pca9685
             - manual_axis: the axis that will control the fine-tuning movements
@@ -148,6 +246,7 @@ class ServoComponent(OutputComponent):
 
         # Setup PCA9685 connection
         self.pca9685 = pca9685
+
         self.pca9685_channel = int(pca9685_channel)
 
         self.manual_axis = manual_axis
@@ -155,7 +254,7 @@ class ServoComponent(OutputComponent):
         self.max_pwm = int(max_pwm)
         self.min_pwm = int(min_pwm)
 
-        # Check presets for errors
+      # Check presets for errors
         for p in presets:
             if p[1] > self.max_pwm or p[1] < self.min_pwm:
                 logger.warn("A preset value is out of range!!!!")
@@ -168,6 +267,8 @@ class ServoComponent(OutputComponent):
         
         self.servo_speed = servo_speed
 
+        
+        
         self.setup()
 
     def stop(self):
@@ -180,9 +281,12 @@ class ServoComponent(OutputComponent):
             self.move_towards()
             asyncio.sleep(0.01)
 
+    def output(self):
+        self.pca9685.set_pwm(self.channel, 0, self.target)
+
     async def update(self, data_dict):
         ''' Update the target of the servo based on the data_dict '''
-
+        
         # Validate that data is in the set range
         if self.target > self.max_pwm or self.target < self.min_pwm:
             logger.warn('Target servo pwm out of range')

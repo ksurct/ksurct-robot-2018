@@ -12,7 +12,7 @@ except ImportError:
 ##############################################################
 
 # Server Setings
-SERVER_IP = '129.130.46.4'
+SERVER_IP = '10.135.79.79'
 SERVER_PORT = 8055
 
 ##############################################################
@@ -24,16 +24,16 @@ PWM_STEP_SIZE = 1
 
 # Servo 0 settings
 SERVO_0_CHANNEL = 0
-SERVO_0_ON_BUTTON = 'r_bump'
-SERVO_0_OFF_BUTTON = 'l_bump'
+SERVO_0_UP_BUTTON = 'r_bump'
+SERVO_0_DOWN_BUTTON = 'l_bump'
 SERVO_0_MAX_PWM = 3000
 SERVO_0_MIN_PWM = 1000
 SERVO_0_SPEED = 300
 
 # Servo 1 settings
 SERVO_1_CHANNEL = 1
-SERVO_1_ON_BUTTON = 'up'
-SERVO_1_OFF_BUTTON = 'down'
+SERVO_1_UP_BUTTON = 'up'
+SERVO_1_DOWN_BUTTON = 'down'
 SERVO_1_MAX_PWM = 3000
 SERVO_1_MIN_PWM = 1000
 SERVO_1_SPEED = 300
@@ -51,15 +51,16 @@ SERVO_2_SPEED = 0
 ##############################################################
 
 # Motor settings
-MOTOR_I2C_ADDRESS = 0x41
-MOTOR_PWM_FREQ = 1600
+MOTOR_I2C_ADDRESS = 0x40
+MOTOR_PWM_FREQ = 1000
+MOTOR_TICKS_PER_ROTATE = 0 # this is not right, update after experiment
 
 # Motor 0 settings
-MOTOR_0_P1 = None
-MOTOR_0_P2 = None
-MOTOR_0_HIGH = None
-MOTOR_0_LOW = None
-MOTOR_0_REVERSE = None
+MOTOR_0_CHANNEL = 0
+MOTOR_0_FORWARD_AXIS = 'r_trigger'
+MOTOR_0_BACKWARD_AXIS = 'l_trigger'
+MOTOR_0_DIR_PIN = 26
+MOTOR_0_REVERSE = False
 
 # Motor 1 settings
 MOTOR_1_P1 = None

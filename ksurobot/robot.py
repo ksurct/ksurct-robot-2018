@@ -21,20 +21,32 @@ class Robot(object):
 
         # Connect to servo and motor pca9685 boards
         servo_pca9685 = PCA9685(SERVO_I2C_ADDRESS)
-        # motor_pca9685 = PCA9685(MOTOR_I2C_ADDRESS)
+        motor_pca9685 = PCA9685(MOTOR_I2C_ADDRESS)
 
         # Set pca9685 board frequencies
         servo_pca9685.set_pwm_freq(SERVO_PWM_FREQ)
-        # motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
+        motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
+
+        motors = [
+            MotorComponent(pca9685=motor_pca9685, channel=0, dir_pin=32),
+            MotorComponent(pca9685=motor_pca9685, channel=1, dir_pin=23),
+            MotorComponent(pca9685=motor_pca9685, channel=2, dir_pin=40),
+            MotorComponent(pca9685=motor_pca9685, channel=3, dir_pin=38),
+        ]
 
         self.output_components = [
+          
             # Servos
             ServoComponent(servo_pca9685, SERVO_0_CHANNEL, SERVO_0_ON_BUTTON, SERVO_0_OFF_BUTTON,
                             SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
             ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_ON_BUTTON, SERVO_1_OFF_BUTTON,
                             SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
             ServoComponent(servo_pca9685, SERVO_2_CHANNEL, SERVO_2_ON_BUTTON, SERVO_2_OFF_BUTTON,
-                            SERVO_2_MAX_PWM, SERVO_2_MIN_PWM, SERVO_2_SPEED)
+                            SERVO_2_MAX_PWM, SERVO_2_MIN_PWM, SERVO_2_SPEED),
+
+            # Motors
+            MotorController(fwd_axis='r_trigger', back_axis='l_trigger', steer_axis='r_stick_x',
+                                    steer_speed=100, motors=motors, min_pwm=2000),
 
             # LED
             LEDComponent(LED_BUTTON, LED_PIN),
