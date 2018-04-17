@@ -40,11 +40,12 @@ class SensorComponent(InputComponent):
 
     def _convert_to_distance(self, voltage):
         ''' Take the voltage read on the sensor and return
-            the distance based on the coefficients '''
+            the distance (in centimeters) based on the coefficients and voltage. 
+        '''
         index = 0
         distance = 0
         while index < len(coeficients):
-            distance += coefficients[index]*(voltage**(len(coefficients)-index-1))
+            distance += coefficients[index]*(voltage**(len(coefficients)-index-1)) # The -1 here is to fix off by 1 error. Coeff[10] should be a constant term.
             index += 1
         return distance
 
