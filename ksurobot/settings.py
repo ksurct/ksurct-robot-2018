@@ -5,7 +5,7 @@
 
 try:
     import RPi.GPIO as io
-except ImportError:
+except RuntimeError:
     io = None
 
 
