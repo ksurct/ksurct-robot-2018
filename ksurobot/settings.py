@@ -20,7 +20,7 @@ SERVER_PORT = 8055
 ##############################################################
 
 # Servo settings
-SERVO_I2C_ADDRESS = 0x40 # Needs to be set
+SERVO_I2C_ADDRESS = 0x60 # Needs to be set
 SERVO_PWM_FREQ = 60
 
 # Servo 0 settings (Brontosaurus neck)
@@ -53,7 +53,7 @@ SERVO_2_SPEED = 300
 ##############################################################
 
 # Motor settings
-MOTOR_I2C_ADDRESS = 0x40 # Needs to be set
+MOTOR_I2C_ADDRESS = 0x70 # Needs to be set
 MOTOR_PWM_FREQ = 1000
 MOTOR_TICKS_PER_ROTATE = 0 # this is not right, update after experiment
 
