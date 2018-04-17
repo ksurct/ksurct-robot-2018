@@ -41,8 +41,12 @@ class SensorComponent(InputComponent):
     def _convert_to_distance(self, voltage):
         ''' Take the voltage read on the sensor and return
             the distance based on the coefficients '''
-        # Not complete
-        return voltage
+        index = 0
+        distance = 0
+        while index < len(coeficients):
+            distance += coefficients[index]*(voltage**(len(coefficients)-index))
+            index += 1
+        return distance
 
     def _get_value(self):
         ''' Get the raw value from the adc about the sensor '''
