@@ -296,7 +296,7 @@ class ServoComponent(OutputComponent):
         ''' Move the servo until it reaches it's starting position '''
         while self.current != self.target:
             self.move_towards()
-            asyncio.sleep(0.01)
+            asyncio.sleep(1)
 
     def output(self):
         self.pca9685.set_pwm(self.channel, 0, self.target)
@@ -314,12 +314,12 @@ class ServoComponent(OutputComponent):
         mod = data_dict[self.modifier]
 
         if mod:
-            if data_dict[UP_BUTTON]:
+            if data_dict[self.UP_BUTTON]:
                 self.target += self.control_speed
-            if data_dict[DOWN_BUTTON]:
+            if data_dict[self.DOWN_BUTTON]:
                 self.target -= self.control_speed
             
-            self.target += data_dict[AXIS] * self.control_speed
+            self.target += data_dict[self.AXIS] * self.control_speed
 
         # Set to a preset value and override manual control
         for preset in self.presets:
@@ -340,7 +340,7 @@ class ServoComponent(OutputComponent):
         # Calculate the amount to move by
         time_delta = time.time() - self._last_time
         move_amt = int(self.servo_speed * time_delta)
-        if move_amt < 1: move_amt = 1
+        if move_amt < 1: move_amt = 0
 
         # Increment towards the target value in the right direction without being out of bounds
         if self.current < self.target:

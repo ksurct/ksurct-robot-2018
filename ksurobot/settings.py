@@ -20,7 +20,7 @@ SERVER_PORT = 8055
 ##############################################################
 
 # Servo settings
-SERVO_I2C_ADDRESS = 0x60 
+SERVO_I2C_ADDRESS = 0x60
 SERVO_PWM_FREQ = 60
 
 # Servo 0 settings (Brontosaurus neck)
@@ -30,13 +30,13 @@ SERVO_0_MAX_PWM = 2100
 SERVO_0_MIN_PWM = 2000
 SERVO_0_PRESETS = [('y', 4095), ('a', 0)]
 SERVO_0_CONTROL_SPEED = 1
-SERVO_0_SPEED = 1
+SERVO_0_SPEED = 10000
 
 # Servo 1 settings (Front Wrist)
 SERVO_1_CHANNEL = 1
 SERVO_1_MODIFIER = ''
-SERVO_1_MAX_PWM = 4096
-SERVO_1_MIN_PWM = 0
+SERVO_1_MAX_PWM = 2500
+SERVO_1_MIN_PWM = 2000
 SERVO_1_PRESETS = [('y', 4095), ('x', 2048), ('a', 0)]
 SERVO_1_CONTROL_SPEED = 1
 SERVO_1_SPEED = 1
@@ -53,7 +53,7 @@ SERVO_2_SPEED = 1
 ##############################################################
 
 # Motor settings
-MOTOR_I2C_ADDRESS = 0x40 
+MOTOR_I2C_ADDRESS = 0x40
 MOTOR_PWM_FREQ = 1000
 MOTOR_FORWARD_AXIS = 'r_trigger'
 MOTOR_BACKWARD_AXIS = 'l_trigger'
