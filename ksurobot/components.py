@@ -271,6 +271,7 @@ class ServoComponent(OutputComponent):
         self._last_time = time.time()
         self._last_ouput = self.current
         
+        self.control_speed = control_speed
         self.servo_speed = servo_speed
         
         self.setup()
@@ -305,11 +306,11 @@ class ServoComponent(OutputComponent):
 
         if mod:
             if data_dict[UP_BUTTON]:
-                self.target += self.servo_speed
+                self.target += self.control_speed
             if data_dict[DOWN_BUTTON]:
-                self.target -= self.servo_speed
+                self.target -= self.control_speed
             
-            self.target += data_dict[AXIS] * self.servo_speed
+            self.target += data_dict[AXIS] * self.control_speed
 
         # Set to a preset value and override manual control
         for preset in self.presets:

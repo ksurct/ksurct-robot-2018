@@ -27,7 +27,7 @@ SERVO_0_MODIFIER = 'l_bump'
 SERVO_0_MAX_PWM = 4096
 SERVO_0_MIN_PWM = 0
 SERVO_0_PRESETS = [('y', 4096), ('a', 0)]
-SERVO_0_CONTROL_SPEED = 1;
+SERVO_0_CONTROL_SPEED = 1
 SERVO_0_SPEED = 300
 
 # Servo 1 settings (Front Wrist)
@@ -36,7 +36,7 @@ SERVO_1_MODIFIER = None
 SERVO_1_MAX_PWM = 4096
 SERVO_1_MIN_PWM = 0
 SERVO_1_PRESETS = [('y', 4096), ('x', 2048), ('a', 0)]
-SERVO_1_CONTROL_SPEED = 1;
+SERVO_1_CONTROL_SPEED = 1
 SERVO_1_SPEED = 300
 
 # Servo 2 settings (Claw)
@@ -45,7 +45,7 @@ SERVO_2_MODIFIER = 'r_bump'
 SERVO_2_MAX_PWM = 4096
 SERVO_2_MIN_PWM = 0
 SERVO_2_PRESETS = [('y', 4096), ('a', 0)]
-SERVO_2_CONTROL_SPEED = 1;
+SERVO_2_CONTROL_SPEED = 1
 SERVO_2_SPEED = 300
 
 ##############################################################
