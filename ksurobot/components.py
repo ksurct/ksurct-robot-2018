@@ -7,6 +7,7 @@ import asyncio
 import logging
 import RPi.GPIO as io
 import time
+import threading
 
 from hardware import MAX192AEPP
 
@@ -286,17 +287,17 @@ class ServoComponent(OutputComponent):
         self.control_speed = control_speed
         self.servo_speed = servo_speed
         
+        self.active = True
         self.setup()
 
     def stop(self):
         ''' Stop Servo '''
-        self.target = self.current
+        self.active = False
 
     def setup(self):
         ''' Move the servo until it reaches it's starting position '''
-        while self.current != self.target:
-            self.move_towards()
-            asyncio.sleep(1)
+        t = threading.Thread(target=self.loop)
+        t.start()
 
     def output(self):
         self.pca9685.set_pwm(self.channel, 0, self.target)
@@ -327,10 +328,11 @@ class ServoComponent(OutputComponent):
                 self.target = int(preset[1])
                 break
 
-        # Slowely move to where we want to be
-        if self.current != self.target:
+    def loop(self):
+        ''' Main loop of special thread '''
+        while self.active:
             self.move_towards()
-
+            time.sleep(0.1)
     
     def move_towards(self):
         ''' Move the servo to self.target,
