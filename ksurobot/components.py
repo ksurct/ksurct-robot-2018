@@ -70,52 +70,59 @@ class OutputComponent(Component):
 
 class LEDComponent(OutputComponent):
 
-    def __init__(self, button, pin):
+    def __init__(self, pca9685=None, pca9685_channel=None, button=None, value=None):
         ''' Setup a button to control a pin to control an LED
-        
+
+            - pca9685: an object to output the pwm
+            - pca9685_channel: the channel to output to using the pca9685
             - button: the controller button that will toggle the LED
-            - pin: the GPIO pin that the LED in controlled from
+            - value: the output value, larger is brighter
         '''
 
+        self.pca9685 = pca9685
+        self.pca9685_channel = pca9685_channel
         self.button = button
-        self.pin = pin
+        self.value = value
         self._state = 0
 
-        # Setup output pins
-        io.setup(self.pin, io.OUT)
         self.stop()
 
     def stop(self):
         ''' Turn off all pins '''
-        io.output(self.pin, False)
+        self.output(False)
+    
+    def output(self, value):
+        ''' Output to the LED's through i2c '''
+        if value:
+            self.pca9685.set_pwm(self.pca9685_channel, 0, self.value)
+        else:
+            self.pca9685.set_pwm(self.pca9685_channel, 0, 0)
 
     async def update(self, data_dict):
         ''' Update the state of the LED '''
         if self._state == 0:
             if data_dict[self.button]:
-                io.output(self.pin, True)
+                self.output(True)
                 self._state = 3
         elif self._state == 1:
             if not data_dict[self.button]:
-                # io.output(self.pin, False) # redundant
                 self._state = 0
         elif self._state == 2:
             if data_dict[self.button]:
-                io.output(self.pin, False)
+                self.output(False)
                 self._state = 1
         elif self._state == 3:
             if not data_dict[self.button]:
-                # io.output(self.pin, True) # redundant
                 self._state = 2
 
 
 class MotorComponent(Component):
 
-    def __init__(self, pca9685=None, channel=None, dir_pin=None, reverse=False):
+    def __init__(self, pca9685=None, pca9685_channel=None, dir_pin=None, reverse=False):
         ''' Setup PCA9685, and other settings
         
             - pca9685: an object to output the pwm
-            - channel: the channel to output to using the pca9685
+            - pca9685_channel: the channel to output to using the pca9685
             - min_pwm: the minimum value that we can output to the motor
             - dir_pin: the GPIO pin that will output the direction to the motor controller
             - feedback_pin: (NOT USED) the pin that provides feedback about the motors speed
@@ -124,7 +131,7 @@ class MotorComponent(Component):
 
         # Setup PCA9685
         self.pca9685 = pca9685
-        self.channel = channel
+        self.pca9685_channel = pca9685_channel
 
         # Setup the pin to output the direction of the motors
         self.dir_pin = dir_pin
@@ -139,7 +146,7 @@ class MotorComponent(Component):
 
     def stop(self):
         ''' Stop motor '''
-        self.pca9685.set_pwm(self.channel, 0, 0)
+        self.pca9685.set_pwm(self.pca9685_channel, 0, 0)
         self.last_value = 0
 
     def output(self, value):
@@ -163,9 +170,9 @@ class MotorComponent(Component):
             direction = 1
             value = abs(value)
         if value < 4096:
-            self.pca9685.set_pwm(self.channel, 0, value)
+            self.pca9685.set_pwm(self.pca9685_channel, 0, value)
 
-        logging.getLogger('__main__').info('Setting: {}, {}'.format(self.channel, value))
+        logging.getLogger('__main__').info('Setting: {}, {}'.format(self.pca9685_channel, value))
 
         # if not value: # Just to save time
         io.output(self.dir_pin, direction ^ self.reverse)
@@ -173,7 +180,7 @@ class MotorComponent(Component):
 
 class MotorController(OutputComponent):
 
-    def __init__(self, fwd_axis=None, back_axis=None, steer_axis=None, steer_speed=100, motors=None, min_pwm=0, reverse=False):
+    def __init__(self, fwd_axis=None, back_axis=None, steer_axis=None, steer_speed=0, motors=None, min_pwm=0, reverse=False):
         ''' Setup controls and individual motors
 
             - fwd_axis: a button axis with a range of -4096 to 4095
@@ -304,10 +311,7 @@ class ServoComponent(OutputComponent):
             return
 
         # Get Modifier
-        if not self.modifier:
-            mod = not data_dict['r_bump'] and not data_dict['l_bump'])
-        else:
-            mod = data_dict[self.modifier]
+        mod = data_dict[self.modifier]
 
         if mod:
             if data_dict[UP_BUTTON]:

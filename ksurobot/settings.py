@@ -26,78 +26,54 @@ SERVO_PWM_FREQ = 60
 # Servo 0 settings (Brontosaurus neck)
 SERVO_0_CHANNEL = 0
 SERVO_0_MODIFIER = 'l_bump'
-SERVO_0_MAX_PWM = 4096
-SERVO_0_MIN_PWM = 0
-SERVO_0_PRESETS = [('y', 4096), ('a', 0)]
+SERVO_0_MAX_PWM = 2100
+SERVO_0_MIN_PWM = 2000
+SERVO_0_PRESETS = [('y', 4095), ('a', 0)]
 SERVO_0_CONTROL_SPEED = 1
-SERVO_0_SPEED = 300
+SERVO_0_SPEED = 1
 
 # Servo 1 settings (Front Wrist)
 SERVO_1_CHANNEL = 1
-SERVO_1_MODIFIER = None
+SERVO_1_MODIFIER = ''
 SERVO_1_MAX_PWM = 4096
 SERVO_1_MIN_PWM = 0
-SERVO_1_PRESETS = [('y', 4096), ('x', 2048), ('a', 0)]
+SERVO_1_PRESETS = [('y', 4095), ('x', 2048), ('a', 0)]
 SERVO_1_CONTROL_SPEED = 1
-SERVO_1_SPEED = 300
+SERVO_1_SPEED = 1
 
 # Servo 2 settings (Claw)
-SERVO_2_CHANNEL = 3 # 3 isn't a typo, Isaiah wired it dumbly
+SERVO_2_CHANNEL = 2
 SERVO_2_MODIFIER = 'r_bump'
-SERVO_2_MAX_PWM = 4096
-SERVO_2_MIN_PWM = 0
-SERVO_2_PRESETS = [('y', 4096), ('a', 0)]
+SERVO_2_MAX_PWM = 3000
+SERVO_2_MIN_PWM = 2000
+SERVO_2_PRESETS = [('y', 4095), ('a', 0)]
 SERVO_2_CONTROL_SPEED = 1
-SERVO_2_SPEED = 300
+SERVO_2_SPEED = 1
 
 ##############################################################
 
 # Motor settings
-MOTOR_I2C_ADDRESS = 0x70 
+MOTOR_I2C_ADDRESS = 0x40 
 MOTOR_PWM_FREQ = 1000
-MOTOR_TICKS_PER_ROTATE = 0 # this is not right, update after experiment
-
-# Motor 0 settings
-MOTOR_0_CHANNEL = 0
-MOTOR_0_FORWARD_AXIS = 'r_trigger'
-MOTOR_0_BACKWARD_AXIS = 'l_trigger'
-MOTOR_0_DIR_PIN = 26
-MOTOR_0_REVERSE = False
-
-# Motor 1 settings
-MOTOR_1_P1 = None
-MOTOR_1_P2 = None
-MOTOR_1_HIGH = None
-MOTOR_1_LOW = None
-MOTOR_1_REVERSE = None
-
-# Motor 2 settings
-MOTOR_2_P1 = None
-MOTOR_2_P2 = None
-MOTOR_2_HIGH = None
-MOTOR_2_LOW = None
-MOTOR_2_REVERSE = None
-
-# Motor 3 settings
-MOTOR_3_P1 = None
-MOTOR_3_P2 = None
-MOTOR_3_HIGH = None
-MOTOR_3_LOW = None
-MOTOR_3_REVERSE = None
+MOTOR_FORWARD_AXIS = 'r_trigger'
+MOTOR_BACKWARD_AXIS = 'l_trigger'
+MOTOR_STEER_AXIS = 'r_stick_x'
+MOTOR_MIN_PWM = 2000
 
 ##############################################################
 
 # GPIO settings
 if io:
-    GPIO_MODE = io.BCM
+    GPIO_MODE = io.BOARD
 
 # LED settings
-LED_BUTTON = 'a'
-LED_PIN = 20
+LED_CHANNEL = 3
+LED_BUTTON = 'b'
+LED_VALUE = 3000
 
 ##############################################################
 
-SPI_DEVICE = 0
+SPI_DEVICE = 1
 
 ##############################################################
 

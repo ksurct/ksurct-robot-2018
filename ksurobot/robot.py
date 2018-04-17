@@ -48,11 +48,11 @@ class Robot(object):
                             reverse=False),
 
             # Motors
-            MotorController(fwd_axis='r_trigger', back_axis='l_trigger', steer_axis='r_stick_x',
-                                    steer_speed=100, motors=motors, min_pwm=2000),
+            MotorController(fwd_axis=MOTOR_FORWARD_AXIS, back_axis=MOTOR_BACKWARD_AXIS, steer_axis=MOTOR_STEER_AXIS,
+                                    steer_speed=100, motors=motors, min_pwm=MOTOR_MIN_PWM),
 
             # LED
-            LEDComponent(LED_BUTTON, LED_PIN),
+            LEDComponent(pca9685=servo_pca9685, pca9685_channel=LED_CHANNEL, button=LED_BUTTON, value=LED_VALUE),
         ]
 
         # check output components
