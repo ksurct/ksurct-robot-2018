@@ -231,16 +231,22 @@ class MotorController(OutputComponent):
 
 class ServoComponent(OutputComponent):
 
+    UP_BUTTON = 'up'
+    DOWN_BUTTON = 'down'
+    AXIS = 'r_stick_y'
 
-    def __init__(self, pca9685, pca9685_channel, manual_axis, max_pwm, min_pwm, presets, servo_speed):
-        ''' Setup PCA9685 and button logic   
+    def __init__(self, pca9685=None, pca9685_channel=None, modifier=None, max_pwm=None, min_pwm=None,
+                    presets=None, control_speed=None, servo_speed=None, reverse=False):
+        ''' Setup PCA9685 and button logic
+
             - pca9685: an object to output the pwm
             - pca9685_channel: the channel to output to using the pca9685
-            - manual_axis: the axis that will control the fine-tuning movements
+            - modifier: the button that will control the fine-tuning movements
             - max_pwm: the maximum value that we can output to the servo
             - min_pwm: the minimum value that we can output to the servo
             - presets: A list that consits of tuples in the form (button_name, preset_value)
                     with the highest priorty at the front
+            - control_speed: the speed that the user is controling the servo with
             - servo_speed: the speed that the servo moves at
          '''
 
@@ -249,7 +255,7 @@ class ServoComponent(OutputComponent):
 
         self.pca9685_channel = int(pca9685_channel)
 
-        self.manual_axis = manual_axis
+        self.modifier = modifier
 
         self.max_pwm = int(max_pwm)
         self.min_pwm = int(min_pwm)
@@ -266,8 +272,6 @@ class ServoComponent(OutputComponent):
         self._last_ouput = self.current
         
         self.servo_speed = servo_speed
-
-        
         
         self.setup()
 
@@ -293,11 +297,19 @@ class ServoComponent(OutputComponent):
             self.stop()
             return
 
-        # Check data_dict for manual control
-        if data_dict[self.manual_axis] > 0:
-            self.target = self.target + self.servo_speed
-        elif data_dict[self.manual_axis] < 0:
-            self.target = self.target - self.servo_speed
+        # Get Modifier
+        if not self.modifier:
+            mod = not data_dict['r_bump'] and not data_dict['l_bump'])
+        else:
+            mod = data_dict[self.modifier]
+
+        if mod:
+            if data_dict[UP_BUTTON]:
+                self.target += self.servo_speed
+            if data_dict[DOWN_BUTTON]:
+                self.target -= self.servo_speed
+            
+            self.target += data_dict[AXIS] * self.servo_speed
 
         # Set to a preset value and override manual control
         for preset in self.presets:

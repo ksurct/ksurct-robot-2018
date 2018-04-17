@@ -28,21 +28,24 @@ class Robot(object):
         motor_pca9685.set_pwm_freq(MOTOR_PWM_FREQ)
 
         motors = [
-            MotorComponent(pca9685=motor_pca9685, channel=0, dir_pin=32),
-            MotorComponent(pca9685=motor_pca9685, channel=1, dir_pin=23),
-            MotorComponent(pca9685=motor_pca9685, channel=2, dir_pin=40),
-            MotorComponent(pca9685=motor_pca9685, channel=3, dir_pin=38),
+            # Motors
+            MotorComponent(pca9685=motor_pca9685, channel=0, dir_pin=32), # Front Right
+            MotorComponent(pca9685=motor_pca9685, channel=1, dir_pin=23), # Back Right
+            MotorComponent(pca9685=motor_pca9685, channel=2, dir_pin=40), # Back Left
+            MotorComponent(pca9685=motor_pca9685, channel=3, dir_pin=38), # Front Left
         ]
 
         self.output_components = [
-          
             # Servos
-            ServoComponent(servo_pca9685, SERVO_0_CHANNEL, SERVO_0_ON_BUTTON, SERVO_0_OFF_BUTTON,
-                            SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
-            ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_ON_BUTTON, SERVO_1_OFF_BUTTON,
-                            SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
-            ServoComponent(servo_pca9685, SERVO_2_CHANNEL, SERVO_2_ON_BUTTON, SERVO_2_OFF_BUTTON,
-                            SERVO_2_MAX_PWM, SERVO_2_MIN_PWM, SERVO_2_SPEED),
+            ServoComponent(pca9685=servo_pca9685, pca9685_channel=SERVO_0_CHANNEL, modifier=SERVO_0_MODIFIER, max_pwm=SERVO_0_MAX_PWM,
+                            min_pwm=SERVO_0_MIN_PWM, presets=SERVO_0_PRESETS, control_speed=SERVO_0_CONTROL_SPEED, servo_speed=SERVO_0_SPEED, 
+                            reverse=False),
+            ServoComponent(pca9685=servo_pca9685, pca9685_channel=SERVO_1_CHANNEL, modifier=SERVO_1_MODIFIER, max_pwm=SERVO_1_MAX_PWM,
+                            min_pwm=SERVO_1_MIN_PWM, presets=SERVO_1_PRESETS, control_speed=SERVO_1_CONTROL_SPEED, servo_speed=SERVO_1_SPEED, 
+                            reverse=False),
+            ServoComponent(pca9685=servo_pca9685, pca9685_channel=SERVO_2_CHANNEL, modifier=SERVO_2_MODIFIER, max_pwm=SERVO_2_MAX_PWM,
+                            min_pwm=SERVO_2_MIN_PWM, presets=SERVO_2_PRESETS, control_speed=SERVO_2_CONTROL_SPEED, servo_speed=SERVO_2_SPEED, 
+                            reverse=False),
 
             # Motors
             MotorController(fwd_axis='r_trigger', back_axis='l_trigger', steer_axis='r_stick_x',

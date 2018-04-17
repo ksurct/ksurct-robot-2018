@@ -18,40 +18,40 @@ SERVER_PORT = 8055
 ##############################################################
 
 # Servo settings
-SERVO_I2C_ADDRESS = 0x40
+SERVO_I2C_ADDRESS = 0x40 # Needs to be set
 SERVO_PWM_FREQ = 60
-PWM_STEP_SIZE = 1
 
-# Servo 0 settings
+# Servo 0 settings (Front wrist)
 SERVO_0_CHANNEL = 0
-SERVO_0_UP_BUTTON = 'r_bump'
-SERVO_0_DOWN_BUTTON = 'l_bump'
-SERVO_0_MAX_PWM = 3000
-SERVO_0_MIN_PWM = 1000
+SERVO_0_MODIFIER = None
+SERVO_0_MAX_PWM = 4096
+SERVO_0_MIN_PWM = 0
+SERVO_0_PRESETS = [('y', 4096), ('x', 2048), ('a', 0)]
+SERVO_0_CONTROL_SPEED = 1;
 SERVO_0_SPEED = 300
 
-# Servo 1 settings
+# Servo 1 settings (Claw)
 SERVO_1_CHANNEL = 1
-SERVO_1_UP_BUTTON = 'up'
-SERVO_1_DOWN_BUTTON = 'down'
-SERVO_1_MAX_PWM = 3000
-SERVO_1_MIN_PWM = 1000
+SERVO_1_MODIFIER = 'r_bump'
+SERVO_1_MAX_PWM = 4096
+SERVO_1_MIN_PWM = 0
+SERVO_1_PRESETS = [('y', 4096), ('a', 0)]
+SERVO_1_CONTROL_SPEED = 1;
 SERVO_1_SPEED = 300
 
 # Servo 2 settings (brotosaurus neck)
-SERVO_2_CHANNEL = -1
-SERVO_2_ON_BUTTON = 'test'
-SERVO_2_OFF_BUTTON = 'test'
-SERVO_2_MAX_PWM = 0
+SERVO_2_CHANNEL = 2
+SERVO_2_MODIFIER = 'l_bump'
+SERVO_2_MAX_PWM = 4096
 SERVO_2_MIN_PWM = 0
-SERVO_2_SPEED = 0
-#################### UPDATE THESE CONSTANTS #################
-
+SERVO_2_PRESETS = [('y', 4096), ('a', 0)]
+SERVO_2_CONTROL_SPEED = 1;
+SERVO_2_SPEED = 300
 
 ##############################################################
 
 # Motor settings
-MOTOR_I2C_ADDRESS = 0x40
+MOTOR_I2C_ADDRESS = 0x40 # Needs to be set
 MOTOR_PWM_FREQ = 1000
 MOTOR_TICKS_PER_ROTATE = 0 # this is not right, update after experiment
 
