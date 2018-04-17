@@ -7,12 +7,14 @@ try:
     import RPi.GPIO as io
 except RuntimeError:
     io = None
+except ImportError:
+    io = None
 
 
 ##############################################################
 
 # Server Setings
-SERVER_IP = '10.135.79.79'
+SERVER_IP = '10.243.136.213'
 SERVER_PORT = 8055
 
 ##############################################################
