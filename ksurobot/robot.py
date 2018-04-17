@@ -35,11 +35,14 @@ class Robot(object):
         ]
 
         self.output_components = [
+          
             # Servos
-#            ServoComponent(servo_pca9685, SERVO_0_CHANNEL, SERVO_0_UP_BUTTON, SERVO_0_DOWN_BUTTON,
-#                            SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
-#            ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_UP_BUTTON, SERVO_1_DOWN_BUTTON,
-#                            SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
+            ServoComponent(servo_pca9685, SERVO_0_CHANNEL, SERVO_0_ON_BUTTON, SERVO_0_OFF_BUTTON,
+                            SERVO_0_MAX_PWM, SERVO_0_MIN_PWM, SERVO_0_SPEED),
+            ServoComponent(servo_pca9685, SERVO_1_CHANNEL, SERVO_1_ON_BUTTON, SERVO_1_OFF_BUTTON,
+                            SERVO_1_MAX_PWM, SERVO_1_MIN_PWM, SERVO_1_SPEED),
+            ServoComponent(servo_pca9685, SERVO_2_CHANNEL, SERVO_2_ON_BUTTON, SERVO_2_OFF_BUTTON,
+                            SERVO_2_MAX_PWM, SERVO_2_MIN_PWM, SERVO_2_SPEED),
 
             # Motors
             MotorController(fwd_axis='r_trigger', back_axis='l_trigger', steer_axis='r_stick_x',
