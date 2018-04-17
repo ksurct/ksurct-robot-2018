@@ -1,5 +1,5 @@
-# This receives the video stream from the pi when the pi is running video.sh
+# This receives the video stream from the pi when the pi is running send_video_stream.sh
 # Run this script on the desktop to receive video
-# Change 9001 to the port number desired for the stream to come across from the pi.
+# Change 8001 to the port number desired for the stream to come across from the pi.
 
-nc -l 9001  | mplayer -fps 60 -cache 1024 -
+nc -l 8001  | mplayer -fps 60 -cache 2048 -
