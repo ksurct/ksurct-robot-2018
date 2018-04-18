@@ -120,10 +120,10 @@ class Client(object):
         controller_data['l_trigger'] = int(self.controller.left_trigger() >> 3)
 
         # Analog sticks
-        controller_data['r_stick_x'] = int(10*int(self.controller.right_x(), 1))
-        controller_data['r_stick_y'] = int(-10*int(self.controller.right_y(), 1))
-        controller_data['l_stick_x'] = int(10*int(self.controller.left_x(), 1))
-        controller_data['l_stick_y'] = int(-10*int(self.controller.left_y(), 1))
+        controller_data['r_stick_x'] = int(10*int(self.controller.right_x()))
+        controller_data['r_stick_y'] = int(-10*int(self.controller.right_y()))
+        controller_data['l_stick_x'] = int(10*int(self.controller.left_x()))
+        controller_data['l_stick_y'] = int(-10*int(self.controller.left_y()))
 
         # Modifiers
         controller_data['r_bump'] = 1 if self.controller.right_bumper() else 0
