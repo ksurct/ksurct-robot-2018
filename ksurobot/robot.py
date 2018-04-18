@@ -30,9 +30,9 @@ class Robot(object):
         motors = [
             # Motors
             MotorComponent(pca9685=motor_pca9685, pca9685_channel=0, dir_pin=32), # Front Right
-            MotorComponent(pca9685=motor_pca9685, pca9685_channel=1, dir_pin=23), # Back Right
-            MotorComponent(pca9685=motor_pca9685, pca9685_channel=2, dir_pin=40), # Back Left
-            MotorComponent(pca9685=motor_pca9685, pca9685_channel=3, dir_pin=38), # Front Left
+            MotorComponent(pca9685=motor_pca9685, pca9685_channel=1, dir_pin=38, reverse=True), # Front Left
+            MotorComponent(pca9685=motor_pca9685, pca9685_channel=2, dir_pin=22), # Back Right
+            MotorComponent(pca9685=motor_pca9685, pca9685_channel=3, dir_pin=40, reverse=True), # Back Left
         ]
 
         self.output_components = [
@@ -49,7 +49,7 @@ class Robot(object):
 
             # Motors
             MotorController(fwd_axis=MOTOR_FORWARD_AXIS, back_axis=MOTOR_BACKWARD_AXIS, steer_axis=MOTOR_STEER_AXIS,
-                                    steer_speed=100, motors=motors, min_pwm=MOTOR_MIN_PWM),
+                                    steer_speed=MOTOR_STEER_SPEED, motors=motors, min_pwm=MOTOR_MIN_PWM, reverse=True),
 
             # LED
             LEDComponent(pca9685=servo_pca9685, pca9685_channel=LED_CHANNEL, button=LED_BUTTON, value=LED_VALUE),

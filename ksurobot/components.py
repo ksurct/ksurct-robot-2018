@@ -45,8 +45,8 @@ class SensorComponent(InputComponent):
         '''
         index = 0
         distance = 0
-        while index < len(coeficients):
-            distance += coefficients[index]*(voltage**(len(coefficients)-index-1)) # The -1 here is to fix off by 1 error. Coeff[10] should be a constant term.
+        while index < len(self.coefficients):
+            distance += self.coefficients[index]*(voltage**(len(self.coefficients)-index-1)) # The -1 here is to fix off by 1 error. Coeff[10] should be a constant term.
             index += 1
         return distance
 
@@ -215,18 +215,24 @@ class MotorController(OutputComponent):
 
         fwd, back = (data_dict[self.fwd_axis] + 4096) // 2, (data_dict[self.back_axis] + 4096) // 2
         steer = -data_dict[self.steer_axis] if self.reverse else data_dict[self.steer_axis]
-        
+
         val = fwd - back
+        amt = (abs(steer)*self.steer_speed)
         if steer < 0:
-            r_val = val - (abs(steer)*self.steer_speed)
-            l_val = val
+            r_val = val - amt // 2
+            l_val = val + amt // 2
         else:
-            r_val = val
-            l_val = val - (abs(steer)*self.steer_speed)
+            r_val = val + amt // 2
+            l_val = val - amt // 2
 
         # Map values to a range between min_pwm and 4095
         # but keep at 0 if already at zero
         slope = self.min_pwm / 4095
+
+        r_val = min(r_val, 4095)
+        l_val = min(l_val, 4095)
+        r_val = max(r_val, -4096)
+        l_val = max(l_val, -4096)
         
         if r_val > 0: r_val = int(slope * r_val) + self.min_pwm
         if r_val < 0: r_val = int(slope * r_val) - self.min_pwm
@@ -236,10 +242,11 @@ class MotorController(OutputComponent):
 
         # logging.getLogger('__main__').info('Controller values: {0}, {1}'.format(r_val, l_val))
 
+
         self.motors[0].output(r_val) # Front Right
-        self.motors[1].output(r_val) # Back Right
-        self.motors[2].output(l_val) # Back Left
-        self.motors[3].output(l_val) # Front Left
+        self.motors[1].output(l_val) # Front Left
+        self.motors[2].output(r_val) # Back Right
+        self.motors[3].output(l_val) # Back Left
 
 
 class ServoComponent(OutputComponent):
@@ -283,10 +290,10 @@ class ServoComponent(OutputComponent):
         self.target = self.min_pwm
         self._last_time = time.time()
         self._last_ouput = self.current
-        
+
         self.control_speed = control_speed
         self.servo_speed = servo_speed
-        
+
         self.active = True
         self.setup()
 
@@ -333,7 +340,7 @@ class ServoComponent(OutputComponent):
         while self.active:
             self.move_towards()
             time.sleep(0.1)
-    
+
     def move_towards(self):
         ''' Move the servo to self.target,
             increment self.current according to the servo speed and time elapsed,
@@ -349,11 +356,12 @@ class ServoComponent(OutputComponent):
             self.current = min(self.current + move_amt, self.target, self.max_pwm)
         elif self.current >= self.target:
             self.current = max(self.current - move_amt, self.target, self.min_pwm)
-        
+
         # Output if change is needed
         if self.current != self._last_ouput:
+            # logger.info('Outputing {0}, {1}'.format(self.current, threading.current_thread().getName()))
             self.pca9685.set_pwm(self.pca9685_channel, 0, self.current) # Move the servo CHECK OUT THE 0
-        
+
         # Save state for future
         self._last_time = time.time()
         self._last_ouput = self.current
