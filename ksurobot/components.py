@@ -286,7 +286,7 @@ class ServoComponent(OutputComponent):
                 logger.warn("A preset value is out of range!!!!")
         self.presets = presets
 
-        self.current = 0
+        self.current = self.min_pwm
         self.target = self.min_pwm
         self._last_time = time.time()
         self._last_ouput = self.current
@@ -326,8 +326,11 @@ class ServoComponent(OutputComponent):
                 self.target += self.control_speed
             if data_dict[self.DOWN_BUTTON]:
                 self.target -= self.control_speed
-            
+
             self.target += data_dict[self.AXIS] * self.control_speed
+            
+            self.target = min(self.target, self.max_pwm)
+            self.target = max(self.target, self.min_pwm)
 
         # Set to a preset value and override manual control
         for preset in self.presets:
@@ -339,7 +342,7 @@ class ServoComponent(OutputComponent):
         ''' Main loop of special thread '''
         while self.active:
             self.move_towards()
-            time.sleep(0.1)
+            time.sleep(0.02)
 
     def move_towards(self):
         ''' Move the servo to self.target,
