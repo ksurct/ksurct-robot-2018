@@ -349,7 +349,8 @@ class ServoComponent(OutputComponent):
         # Calculate the amount to move by
         time_delta = time.time() - self._last_time
         move_amt = int(self.servo_speed * time_delta)
-        if move_amt < 1: move_amt = 0
+        if move_amt < 1:
+            return
 
         # Increment towards the target value in the right direction without being out of bounds
         if self.current < self.target:
@@ -357,10 +358,8 @@ class ServoComponent(OutputComponent):
         elif self.current >= self.target:
             self.current = max(self.current - move_amt, self.target, self.min_pwm)
 
-        # Output if change is needed
-        if self.current != self._last_ouput:
-            # logger.info('Outputing {0}, {1}'.format(self.current, threading.current_thread().getName()))
-            self.pca9685.set_pwm(self.pca9685_channel, 0, self.current) # Move the servo CHECK OUT THE 0
+        # Output
+        self.pca9685.set_pwm(self.pca9685_channel, 0, self.current) # Move the servo CHECK OUT THE 0
 
         # Save state for future
         self._last_time = time.time()
