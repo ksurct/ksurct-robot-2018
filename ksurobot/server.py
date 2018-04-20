@@ -5,6 +5,7 @@
 import asyncio
 import pickle
 import logging
+import subprocess
 import time
 import websockets
 
@@ -33,6 +34,7 @@ class Server(object):
         self.robot = robot
         self._time_of_last_recv = time.time()
         self.timeout = timeout
+        self.active = True
 
     async def start_server(self):
         ''' Start the server on the defined ip and port '''
@@ -112,15 +114,18 @@ class Server(object):
     async def watchdog(self):
         ''' Make sure that the server still has connection,
             if not, stop the robot and shutdown the server '''
-        while True:
+        await asyncio.sleep(5)
+        while self.active:
             await asyncio.sleep(0.1)
-            if self._time_of_last_recv > self.timeout:
+            if time.time() - self._time_of_last_recv > self.timeout:
                 self.logger.info('Watchdog was not fed, stopping robot and shuting down server')
                 self.stop()
-                self.shutdown()
+                await self.shutdown()
+                subprocess.run(['sudo','reboot'])
 
     async def shutdown(self):
         ''' Shutdown the server if it exsits '''
+        self.active = False
         if self.server:
             self.server.close()
             await self.server.wait_closed()
