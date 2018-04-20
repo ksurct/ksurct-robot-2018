@@ -16,6 +16,8 @@ except ImportError:
 # Server Setings
 SERVER_IP = '10.243.136.213'
 SERVER_PORT = 8055
+SERVER_TIMEOUT = 1
+# Will shut down server after not reciving a command for this long (sec)
 
 ##############################################################
 
