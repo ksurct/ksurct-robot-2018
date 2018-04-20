@@ -70,7 +70,7 @@ if io:
 # LED settings
 LED_CHANNEL = 3
 LED_BUTTON = 'b'
-LED_VALUE = 3000
+LED_VALUE = 4095
 
 ##############################################################
 
