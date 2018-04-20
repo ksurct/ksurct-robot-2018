@@ -5,6 +5,8 @@
 import asyncio
 import pickle
 import logging
+import time
+import threading
 import websockets
 
 
@@ -21,7 +23,7 @@ class TextColors:
 class Server(object):
     ''' Defines a server object to handle connections '''
 
-    def __init__(self, ip, port, robot):
+    def __init__(self, ip, port, robot, timeout=1):
         ''' Construct a server with an ip on a port '''
 
         self._active_connections = set()
@@ -30,10 +32,14 @@ class Server(object):
         self.logger = logging.getLogger('__main__')
         self.server = None
         self.robot = robot
+        self._time_of_last_recv = time.time()
+        self.timeout = timeout
+        self.alive = True
 
     async def start_server(self):
         ''' Start the server on the defined ip and port '''
 
+        threading.Thread(target=self.watchdog).start()
         self.logger.info('Server starting up at {0}:{1}'.format(self.ip, self.port))
         self.server = await websockets.serve(self.handle_new_connection, self.ip, self.port, timeout=1)
 
@@ -79,6 +85,8 @@ class Server(object):
             # Use pickle to load the message
             message = pickle.loads(pickled_message)
 
+            # Feed the watch dog
+            self._time_of_last_recv = time.time()
             self.logger.info('Recieved: {}'.format(message))
 
             # Update the robot if it exsits
@@ -103,9 +111,18 @@ class Server(object):
                 await ws.send(pickled_message)
             await asyncio.sleep(.1)
 
+    def watchdog(self):
+        ''' Make sure that the server still has connection,
+            if not, stop the robot and shutdown the server '''
+        while self.alive:
+            if self._time_of_last_recv > self.timeout:
+                self.stop()
+                self.shutdown()
+                exit()
 
     async def shutdown(self):
         ''' Shutdown the server if it exsits '''
+        self.alive = False
         if self.server:
             self.server.close()
             await self.server.wait_closed()
