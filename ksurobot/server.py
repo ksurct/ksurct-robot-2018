@@ -6,7 +6,6 @@ import asyncio
 import pickle
 import logging
 import time
-import threading
 import websockets
 
 
@@ -34,12 +33,10 @@ class Server(object):
         self.robot = robot
         self._time_of_last_recv = time.time()
         self.timeout = timeout
-        self.alive = True
 
     async def start_server(self):
         ''' Start the server on the defined ip and port '''
 
-        threading.Thread(target=self.watchdog).start()
         self.logger.info('Server starting up at {0}:{1}'.format(self.ip, self.port))
         self.server = await websockets.serve(self.handle_new_connection, self.ip, self.port, timeout=1)
 
@@ -55,8 +52,9 @@ class Server(object):
         try:
             consumer_task = asyncio.ensure_future(self.consumer_handler(ws))
             producer_task = asyncio.ensure_future(self.producer_handler(ws))
+            watchdog_task = asyncio.ensure_future(self.watchdog())
 
-            await asyncio.wait([consumer_task, producer_task], return_when=asyncio.FIRST_EXCEPTION)
+            await asyncio.wait([consumer_task, producer_task, watchdog_task], return_when=asyncio.FIRST_EXCEPTION)
 
         except websockets.ConnectionClosed:
             self.logger.info('Connection already closed')
@@ -111,18 +109,18 @@ class Server(object):
                 await ws.send(pickled_message)
             await asyncio.sleep(.1)
 
-    def watchdog(self):
+    async def watchdog(self):
         ''' Make sure that the server still has connection,
             if not, stop the robot and shutdown the server '''
-        while self.alive:
+        while True:
+            await asyncio.sleep(0.1)
             if self._time_of_last_recv > self.timeout:
+                self.logger.info('Watchdog was not fed, stopping robot and shuting down server')
                 self.stop()
                 self.shutdown()
-                exit()
 
     async def shutdown(self):
         ''' Shutdown the server if it exsits '''
-        self.alive = False
         if self.server:
             self.server.close()
             await self.server.wait_closed()
