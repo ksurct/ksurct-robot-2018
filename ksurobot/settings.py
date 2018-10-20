@@ -14,7 +14,7 @@ except ImportError:
 ##############################################################
 
 # Server Setings
-SERVER_IP = '10.131.209.188'
+SERVER_IP = '10.131.32.220'
 SERVER_PORT = 8055
 SERVER_TIMEOUT = 1
 # Will shut down server after not reciving a command for this long (sec)
@@ -36,7 +36,7 @@ SERVO_0_SPEED = 100
 
 # Servo 1 settings (Front Wrist)
 SERVO_1_CHANNEL = 1
-SERVO_1_MODIFIER = ''
+SERVO_1_MODIFIER = 'neither_bumpers'
 SERVO_1_MAX_PWM = 665
 SERVO_1_MIN_PWM = 220
 SERVO_1_PRESETS = [('y', 660), ('x', 442), ('a', 225)]
