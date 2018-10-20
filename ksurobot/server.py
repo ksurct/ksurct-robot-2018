@@ -120,9 +120,11 @@ class Server(object):
             await asyncio.sleep(0.1)
             if time.time() - self._time_of_last_recv > self.timeout:
                 self.logger.info('Watchdog was not fed, stopping robot and shuting down server')
+                raise websockets.ConnectionClosed
                 self.stop()
                 await self.shutdown()
-                subprocess.run(['sudo','reboot'])
+                self.logger.info('Would reboot next')
+                # subprocess.run(['sudo','reboot'])
 
     async def shutdown(self):
         ''' Shutdown the server if it exsits '''

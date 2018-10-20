@@ -173,7 +173,7 @@ class MotorComponent(Component):
         if value < 4096:
             self.pca9685.set_pwm(self.pca9685_channel, 0, value)
 
-        logging.getLogger('__main__').info('Setting: {}, {}'.format(self.pca9685_channel, value))
+        logging.getLogger('__main__').debug('Setting: {}, {}'.format(self.pca9685_channel, value))
 
         # if not value: # Just to save time
         io.output(self.dir_pin, direction ^ self.reverse)
