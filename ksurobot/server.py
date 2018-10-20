@@ -5,6 +5,8 @@
 import asyncio
 import pickle
 import logging
+import subprocess
+import time
 import websockets
 
 
@@ -21,7 +23,7 @@ class TextColors:
 class Server(object):
     ''' Defines a server object to handle connections '''
 
-    def __init__(self, ip, port, robot):
+    def __init__(self, ip, port, robot, timeout=1):
         ''' Construct a server with an ip on a port '''
 
         self._active_connections = set()
@@ -30,6 +32,9 @@ class Server(object):
         self.logger = logging.getLogger('__main__')
         self.server = None
         self.robot = robot
+        self._time_of_last_recv = time.time()
+        self.timeout = timeout
+        self.active = True
 
     async def start_server(self):
         ''' Start the server on the defined ip and port '''
@@ -49,8 +54,9 @@ class Server(object):
         try:
             consumer_task = asyncio.ensure_future(self.consumer_handler(ws))
             producer_task = asyncio.ensure_future(self.producer_handler(ws))
+            watchdog_task = asyncio.ensure_future(self.watchdog())
 
-            await asyncio.wait([consumer_task, producer_task], return_when=asyncio.FIRST_EXCEPTION)
+            await asyncio.wait([consumer_task, producer_task, watchdog_task], return_when=asyncio.FIRST_EXCEPTION)
 
         except websockets.ConnectionClosed:
             self.logger.info('Connection already closed')
@@ -79,6 +85,8 @@ class Server(object):
             # Use pickle to load the message
             message = pickle.loads(pickled_message)
 
+            # Feed the watch dog
+            self._time_of_last_recv = time.time()
             self.logger.info('Recieved: {}'.format(message))
 
             # Update the robot if it exsits
@@ -103,9 +111,21 @@ class Server(object):
                 await ws.send(pickled_message)
             await asyncio.sleep(.1)
 
+    async def watchdog(self):
+        ''' Make sure that the server still has connection,
+            if not, stop the robot and shutdown the server '''
+        await asyncio.sleep(5)
+        while self.active:
+            await asyncio.sleep(0.1)
+            if time.time() - self._time_of_last_recv > self.timeout:
+                self.logger.info('Watchdog was not fed, stopping robot and shuting down server')
+                self.stop()
+                await self.shutdown()
+                subprocess.run(['sudo','reboot'])
 
     async def shutdown(self):
         ''' Shutdown the server if it exsits '''
+        self.active = False
         if self.server:
             self.server.close()
             await self.server.wait_closed()

@@ -120,18 +120,15 @@ class Client(object):
         controller_data['l_trigger'] = int(self.controller.left_trigger() >> 3)
 
         # Analog sticks
-        r_stick_x = round(self.controller.right_x(), 1)
-        r_stick_y = round(self.controller.right_y(), 1)
-        l_stick_x = round(self.controller.left_x(), 1)
-        l_stick_y = round(self.controller.left_y(), 1)
-        controller_data['r_stick'] = (int(10*r_stick_x) if abs(r_stick_x) > 0.1 else 0,
-                            int(-10*r_stick_y) if abs(r_stick_y) > 0.1 else 0 )
-        controller_data['l_stick'] = (int(10*l_stick_x) if abs(l_stick_x) > 0.1 else 0,
-                            int(-10*l_stick_y) if abs(l_stick_y) > 0.1 else 0 )
+        controller_data['r_stick_x'] = int(10*int(self.controller.right_x()))
+        controller_data['r_stick_y'] = int(-10*int(self.controller.right_y()))
+        controller_data['l_stick_x'] = int(10*int(self.controller.left_x()))
+        controller_data['l_stick_y'] = int(-10*int(self.controller.left_y()))
 
-        # Bumpers
+        # Modifiers
         controller_data['r_bump'] = 1 if self.controller.right_bumper() else 0
         controller_data['l_bump'] = 1 if self.controller.left_bumper() else 0
+        controller_data[''] = 1 if not (controller_data['l_bump'] or controller_data['r_bump']) else 0
 
         # D-pad
         controller_data['left'] = 1 if str(self.controller.hat).strip() == 'l' else 0

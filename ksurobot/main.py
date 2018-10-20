@@ -24,7 +24,7 @@ def main():
     # Setup Robot
     robot = Robot()
 
-    server = Server(SERVER_IP, SERVER_PORT, robot)
+    server = Server(SERVER_IP, SERVER_PORT, robot, timeout=SERVER_TIMEOUT)
 
     try:
         # Main event loop
