@@ -56,9 +56,10 @@ class Client(object):
         while True:
             try:
                 sender_task = asyncio.ensure_future(self.sender())
-                receiver_task = asyncio.ensure_future(self.receiver())
+                # receiver_task = asyncio.ensure_future(self.receiver())
 
-                await asyncio.wait([sender_task, receiver_task], return_when=asyncio.FIRST_EXCEPTION)
+                await asyncio.wait([sender_task], return_when=asyncio.FIRST_EXCEPTION) # removed receiver_task
+                # await asyncio.wait([sender_task, receiver_task], return_when=asyncio.FIRST_EXCEPTION)
 
             except CancelledError:
                 pass

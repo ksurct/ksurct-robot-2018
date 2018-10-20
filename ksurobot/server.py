@@ -53,10 +53,11 @@ class Server(object):
         # Create tasks to run in the event loop
         try:
             consumer_task = asyncio.ensure_future(self.consumer_handler(ws))
-            producer_task = asyncio.ensure_future(self.producer_handler(ws))
+            # producer_task = asyncio.ensure_future(self.producer_handler(ws))
             watchdog_task = asyncio.ensure_future(self.watchdog())
 
-            await asyncio.wait([consumer_task, producer_task, watchdog_task], return_when=asyncio.FIRST_EXCEPTION)
+            await asyncio.wait([consumer_task, watchdog_task], return_when=asyncio.FIRST_EXCEPTION) # Removed producer
+            # await asyncio.wait([consumer_task, producer_task, watchdog_task], return_when=asyncio.FIRST_EXCEPTION)
 
         except websockets.ConnectionClosed:
             self.logger.info('Connection already closed')
