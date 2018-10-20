@@ -129,7 +129,7 @@ class Client(object):
         # Modifiers
         controller_data['r_bump'] = 1 if self.controller.right_bumper() else 0
         controller_data['l_bump'] = 1 if self.controller.left_bumper() else 0
-        controller_data[''] = 1 if not (controller_data['l_bump'] or controller_data['r_bump']) else 0
+        controller_data['neither_bumpers'] = 1 if (not controller_data['l_bump'] and not controller_data['r_bump']) else 0
 
         # D-pad
         controller_data['left'] = 1 if str(self.controller.hat).strip() == 'l' else 0
