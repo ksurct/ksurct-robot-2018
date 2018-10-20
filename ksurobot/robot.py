@@ -29,10 +29,10 @@ class Robot(object):
 
         motors = [
             # Motors
-            MotorComponent(pca9685=motor_pca9685, pca9685_channel=0, dir_pin=32), # Front Right
-            MotorComponent(pca9685=motor_pca9685, pca9685_channel=1, dir_pin=38, reverse=True), # Front Left
-            MotorComponent(pca9685=motor_pca9685, pca9685_channel=2, dir_pin=22), # Back Right
-            MotorComponent(pca9685=motor_pca9685, pca9685_channel=3, dir_pin=40, reverse=True), # Back Left
+            MotorComponent(pca9685=motor_pca9685, pca9685_channel=0, dir_pin=33), # Front Right
+            MotorComponent(pca9685=motor_pca9685, pca9685_channel=1, dir_pin=29, reverse=True), # Front Left
+            MotorComponent(pca9685=motor_pca9685, pca9685_channel=2, dir_pin=35), # Back Right
+            MotorComponent(pca9685=motor_pca9685, pca9685_channel=3, dir_pin=31, reverse=True), # Back Left
         ]
 
         self.output_components = [
