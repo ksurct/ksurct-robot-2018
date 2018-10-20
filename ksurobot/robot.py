@@ -42,16 +42,19 @@ class Robot(object):
         for output in self.output_components:
             assert isinstance(output, OutputComponent)
 
+        # Commented out sensors for debug, we removed the actual sensors / pcb from the bot
+        
         self.input_components = [
-            SensorComponent(SENSOR_0_NAME, SENSOR_0_CHANNEL, SENSOR_0_COEFFICIENTS),
-            SensorComponent(SENSOR_1_NAME, SENSOR_1_CHANNEL, SENSOR_1_COEFFICIENTS),
-            SensorComponent(SENSOR_2_NAME, SENSOR_2_CHANNEL, SENSOR_2_COEFFICIENTS),
-            SensorComponent(SENSOR_3_NAME, SENSOR_3_CHANNEL, SENSOR_3_COEFFICIENTS),
-            SensorComponent(SENSOR_4_NAME, SENSOR_4_CHANNEL, SENSOR_4_COEFFICIENTS),
-            SensorComponent(SENSOR_5_NAME, SENSOR_5_CHANNEL, SENSOR_5_COEFFICIENTS),
-            SensorComponent(SENSOR_6_NAME, SENSOR_6_CHANNEL, SENSOR_6_COEFFICIENTS),
-            SensorComponent(SENSOR_7_NAME, SENSOR_7_CHANNEL, SENSOR_7_COEFFICIENTS),
+        #   SensorComponent(SENSOR_0_NAME, SENSOR_0_CHANNEL, SENSOR_0_COEFFICIENTS),
+        #   SensorComponent(SENSOR_1_NAME, SENSOR_1_CHANNEL, SENSOR_1_COEFFICIENTS),
+        #   SensorComponent(SENSOR_2_NAME, SENSOR_2_CHANNEL, SENSOR_2_COEFFICIENTS),
+        #   SensorComponent(SENSOR_3_NAME, SENSOR_3_CHANNEL, SENSOR_3_COEFFICIENTS),
+        #   SensorComponent(SENSOR_4_NAME, SENSOR_4_CHANNEL, SENSOR_4_COEFFICIENTS),
+        #   SensorComponent(SENSOR_5_NAME, SENSOR_5_CHANNEL, SENSOR_5_COEFFICIENTS),
+        #   SensorComponent(SENSOR_6_NAME, SENSOR_6_CHANNEL, SENSOR_6_COEFFICIENTS),
+        #   SensorComponent(SENSOR_7_NAME, SENSOR_7_CHANNEL, SENSOR_7_COEFFICIENTS),
         ]
+        
 
         # check input components
         for input_ in self.input_components:
