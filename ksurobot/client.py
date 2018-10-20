@@ -99,8 +99,8 @@ class Client(object):
             self.logger.info('Received: {}'.format(message))
 
     async def shutdown(self):
-        if ws.open:
-            await ws.close()
+        if self.ws.open:
+            await self.ws.close()
 
     def get_controller_data(self):
         # Create the dictionary to send
